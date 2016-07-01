@@ -14,6 +14,7 @@
         'type'=>'',
         'aResponses'=>$aDailyResponses,
         'oSurvey'=>$oSurvey,
+        'showAdmin'=>$showAdmin,
     ));
 }?>
 <?php if(!empty($aDailyEnter)){
@@ -22,6 +23,7 @@
         'type'=>'enter',
         'aResponses'=>$aDailyEnter,
         'oSurvey'=>$oSurvey,
+        'showAdmin'=>$showAdmin,
     ));
 }?>
 <?php if(!empty($aDailyAction)){
@@ -30,6 +32,7 @@
         'type'=>'action',
         'aResponses'=>$aDailyAction,
         'oSurvey'=>$oSurvey,
+        'showAdmin'=>$showAdmin,
     ));
 }?>
     <h2><?php echo gT("Taux de participations"); ?></h2>

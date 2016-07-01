@@ -1,7 +1,10 @@
     <h2><?php echo $title; ?></h2>
 
     <?php
+
       echo CHtml::tag("div",array("id"=>"chart-daily{$type}",'class'=>'chart-day graph jqplot-line'),"",true);
+      if($showAdmin)
+        echo CHtml::link(gT("Export"),App()->createUrl('plugins/direct', array('plugin' => 'adminStats', 'function' => 'export','sid'=>$oSurvey->sid,'export'=>"dayresponse",'state'=>$type)),array());
     ?>
     <script>
         $(document).ready(function(){

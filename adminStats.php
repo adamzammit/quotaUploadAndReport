@@ -81,6 +81,11 @@ class adminStats extends \ls\pluginmanager\PluginBase
                 'content'=>"<p class='alert alert-info'>Survey is not activated : no statistics can be shown.</p>",
             );
         }
+        $aSettings["alternateTitle"]=array(
+            'type'=>'string',
+            'label'=>"Titre alternative",
+            'current'=>$this->get("alternateTitle","Survey",$oEvent->get('survey'),""),
+        );
         $aSettings["numberMax"]=array(
             'type'=>'int',
             'label'=>"Nombre d'envoi global (sans invitations)",
@@ -367,6 +372,7 @@ class adminStats extends \ls\pluginmanager\PluginBase
           App()->controller->redirect(array('/admin/authentication'));
         }
         $sAction=$this->event->get('function');
+
         $this->iSurveyId=$this->api->getRequest()->getParam('sid');
         $oSurvey=Survey::model()->findByPK($this->iSurveyId);
         if($this->iSurveyId && !$oSurvey)
@@ -382,9 +388,12 @@ class adminStats extends \ls\pluginmanager\PluginBase
             if(tableExists("{{survey_{$oSurvey->sid}}}"))
             {
                 $oSurvey=Survey::model()->with('languagesettings')->find("sid=:sid",array(":sid"=>$this->iSurveyId));
-                $this->aRenderData['titre']=$oSurvey->getLocalizedTitle();
+                $this->aRenderData['titre']=$this->get("alternateTitle","Survey",$oSurvey->sid,"");
+                if(empty($this->aRenderData['titre'])){
+                    $this->aRenderData['titre']=$oSurvey->getLocalizedTitle();
+                }
                 $this->aRenderData['oSurvey']=$oSurvey;
-                $sAction=in_array($sAction,array('participation','satisfaction')) ? $sAction : 'participation';
+                $sAction=in_array($sAction,array('participation','satisfaction','export')) ? $sAction : 'participation';
             }
             else
             {
@@ -405,6 +414,9 @@ class adminStats extends \ls\pluginmanager\PluginBase
                 break;
             case "satisfaction":
                 $this->actionSatisfaction();
+                break;
+            case "export":
+                $this->actionExportData();
                 break;
             default:
                 $this->actionList();
@@ -775,6 +787,35 @@ class adminStats extends \ls\pluginmanager\PluginBase
         $this->render('satisfaction');
     }
 
+    public function actionExportData()
+    {
+        if(empty($this->aRenderData['oSurvey']))
+            throw new CHttpException(500);
+        $oSurvey=$this->aRenderData['oSurvey'];
+        $exportType="dayresponse";
+        $type=App()->getRequest()->getParam('state');
+        switch($type)
+        {
+            case 'enter':
+                $state='startdate';
+                break;
+            case 'action':
+                $state='datestamp';
+                break;
+            default:
+                $state='submitdate';
+        }
+        $aDatas=$this->getDailyResponsesRate($oSurvey->sid,$state);
+        $aHeader=array(gT("Day"),gT("Nb"));
+        header("Content-Disposition: attachment; filename=" . $state.".csv");
+        header("Content-type: text/comma-separated-values; charset=UTF-8");
+        echo implode(",",$aHeader). PHP_EOL;
+        foreach($aDatas as $key=>$value)
+        {
+            echo $key.",".$value. PHP_EOL;
+        }
+        die();
+    }
     /**
      * Get the reponse by day
      * @param int iSurveyId : the id of the survey
@@ -891,7 +932,11 @@ class adminStats extends \ls\pluginmanager\PluginBase
             {
                 if(tableExists("{{survey_{$oSurvey->sid}}}"))
                 {
-                    $aStatSurveys[]=array_merge($oSurvey->attributes, $oSurvey->defaultlanguage->attributes);
+                    $title=$this->get("alternateTitle","Survey",$oSurvey->sid,"");
+                    if(empty($title)){
+                        $title=$oSurvey->defaultlanguage->surveyls_title;
+                    }
+                    $aStatSurveys[]=array_merge($oSurvey->attributes, $oSurvey->defaultlanguage->attributes,array('title'=>$title));
                 }
             }
         }

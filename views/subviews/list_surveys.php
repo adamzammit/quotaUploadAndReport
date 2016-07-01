@@ -7,7 +7,7 @@
         'caseSensitiveSort'=>false,
         'sort'=>array(
             'attributes'=>array(
-                 'sid', 'surveyls_title','responsesCount','tokensCount'
+                 'sid', 'title','responsesCount','tokensCount'
             ),
         ),
         'pagination'=>array(
@@ -30,7 +30,7 @@
                 'name'=>'surveyls_title',
                 'sortable'=>true,
                 'header'=>gT("Title"),
-                'value'=>'$data["surveyls_title"]',
+                'value'=>'$data["title"]',
             ),
             array(
                 'name'=>'responsesCount',
