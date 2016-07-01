@@ -32,3 +32,5 @@ h2 small{display:block}
 .brand img{height:2em;width:auto}
 
 .jqplot-line .jqplot-point-label{color:#333}
+.nopercentage .rate{border-left:0px none}
+.nopercentage .response{border-left:0px none}

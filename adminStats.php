@@ -85,9 +85,9 @@ class adminStats extends \ls\pluginmanager\PluginBase
             'type'=>'int',
             'label'=>"Nombre d'envoi global (sans invitations)",
             'htmlOptions'=>array(
-                'min'=>1,
+                'min'=>0,
             ),
-            'current'=>$this->get("numberMax","Survey",$oEvent->get('survey'),1),
+            'current'=>$this->get("numberMax","Survey",$oEvent->get('survey'),0),
         );
 
         $aSettings["CrossTitle"]=array(
@@ -113,15 +113,15 @@ class adminStats extends \ls\pluginmanager\PluginBase
                 ),
                 'current'=>$this->get("dailyRateEnter","Survey",$oEvent->get('survey'),0),
             );
-            $aSettings["dailyRateAction"]=array(
-                'type'=>'select',
-                'label'=>"Montrer le taux d'action journalier",
-                'options'=>array(
-                    '1'=>gT('Yes'),
-                    '0'=>gT('No'),
-                ),
-                'current'=>$this->get("dailyRateAction","Survey",$oEvent->get('survey'),0),
-            );
+            //~ $aSettings["dailyRateAction"]=array(
+                //~ 'type'=>'select',
+                //~ 'label'=>"Montrer le taux d'action journalier",
+                //~ 'options'=>array(
+                    //~ '1'=>gT('Yes'),
+                    //~ '0'=>gT('No'),
+                //~ ),
+                //~ 'current'=>$this->get("dailyRateAction","Survey",$oEvent->get('survey'),0),
+            //~ );
         }else{
             $aSettings["dailyRate"]=array(
                 'type'=>'info',
@@ -451,9 +451,11 @@ class adminStats extends \ls\pluginmanager\PluginBase
             $max=Token::model($iSurveyId)->count();// see with Token::model($iSurveyId)->empty()->count()
         }else{
             $max=$this->get("numberMax","Survey",$iSurveyId,0);
+            $max=($max>1) ? $max : 0;
         }
         $aResponses['total']=array(
             'title'=>gT("Population"),
+            'max'=>$max,
             'data'=>array(
                 array('title'=>gT("Population Totale"),'max'=>$max,'completed'=>Response::model($iSurveyId)->count("submitdate IS NOT NULL")),
             ),
@@ -508,12 +510,13 @@ class adminStats extends \ls\pluginmanager\PluginBase
                         'order'=>"sortorder",
                         'params'=>array(":qid"=>$oSingleQuestion->qid,":language"=>$oSurvey->language)
                     ));
-
+                    $globalMax=0;
                     foreach($oAnswers as $oAnswer)
                     {
                         $countCriteria=new CdbCriteria();
                         $countCriteria->condition="submitdate IS NOT NULL";
                         $countCriteria->compare(Yii::app()->db->quoteColumnName($sColumn),$oAnswer->code);
+                        $globalMax+=($oAnswer->assessment_value>1 ? $oAnswer->assessment_value : 0);
                         $aData[]=array(
                             'title'=>viewHelper::flatEllipsizeText($oAnswer->answer,true,false),
                             'max'=>($oAnswer->assessment_value>1 ? $oAnswer->assessment_value : 0),
@@ -522,6 +525,7 @@ class adminStats extends \ls\pluginmanager\PluginBase
                     }
                     $aResponses[$sColumn]=array(
                         'title'=>viewHelper::flatEllipsizeText($oSingleQuestion->question,true,false),
+                        'max'=>$globalMax,
                         'data'=>$aData,
                     );
                 }

@@ -32,22 +32,24 @@
     <h2><?php echo gT("Taux de participations"); ?></h2>
 
 <?php foreach($aResponses as $aResponse){ ?>
-    <table class="table table-bordered">
+    <table class="table table-bordered <?php echo ($aResponse['max']>0) ? "" :" nopercentage"; ?>">
         <thead>
             <tr class="header">
-                <th class="answer"><?php echo $aResponse['title'] ?></th>
-                <th class="cell"><?php echo gT("Nombre d'envois") ?></th>
-                <th class="cell"><?php echo gT("Responses") ?></th>
-                <th class="cell"><?php echo gT("Taux de participation") ?></th>
+                <?php
+                echo CHtml::tag("th",array("class"=>'answer'),$aResponse['title']);
+                echo CHtml::tag("td",array("class"=>"cell nbsend"),($aResponse['max']>0) ? gT("Nombre d'envois") :"");
+                echo CHtml::tag("td",array("class"=>"cell response"),gT("Responses"));
+                echo CHtml::tag("td",array("class"=>"cell rate"),($aResponse['max']>0) ? gT("Taux de participation") :"");
+                ?>
             </tr>
         </thead>
         <tbody>
             <?php foreach($aResponse['data'] as $aResponseData){ ?>
                 <tr>
                     <th class="answer"><?php echo $aResponseData['title'] ?></th>
-                    <td class="cell"><?php echo ($aResponseData['max']>0 ? $aResponseData['max'] : "/"); ?></td>
-                    <td class="cell"><?php echo $aResponseData['completed'] ?></td>
-                    <td class="cell"><?php echo ($aResponseData['max']>0) ? round(100*$aResponseData['completed']/$aResponseData['max'],0)."%" : ""; ?></td>
+                    <td class="cell nbsend"><?php echo ($aResponseData['max']>0 ? $aResponseData['max'] : ""); ?></td>
+                    <td class="cell response"><?php echo $aResponseData['completed'] ?></td>
+                    <td class="cell rate"><?php echo ($aResponseData['max']>0) ? round(100*$aResponseData['completed']/$aResponseData['max'],0)."%" : ""; ?></td>
                 </tr>
             <?php } ?>
         </tbody>
