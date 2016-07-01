@@ -326,9 +326,16 @@ class adminStats extends \ls\pluginmanager\PluginBase
     public function newSurveySettings()
     {
         $event = $this->event;
-        foreach ($event->get('settings') as $name => $value)
+        $aSettings=$event->get('settings');
+        /* Fix not set dropdown */
+        $aSettings['tokenAttributes'] = isset($aSettings['tokenAttributes']) ? $aSettings['tokenAttributes'] : null;
+        $aSettings['questionCross'] = isset($aSettings['questionCross']) ? $aSettings['questionCross'] : null;
+        $aSettings['questionNumeric'] = isset($aSettings['questionNumeric']) ? $aSettings['questionNumeric'] : null;
+        $aSettings['tokenAttributesSatisfaction'] = isset($aSettings['tokenAttributesSatisfaction']) ? $aSettings['tokenAttributesSatisfaction'] : null;
+        $aSettings['questionCrossSatisfaction'] = isset($aSettings['questionCrossSatisfaction']) ? $aSettings['questionCrossSatisfaction'] : null;
+
+        foreach ($aSettings as $name => $value)
         {
-            tracevar(array($name,$value));
             /* In order use survey setting, if not set, use global, if not set use default */
             $default=$event->get($name,null,null,isset($this->settings[$name]['default'])?$this->settings[$name]['default']:NULL);
             $this->set($name, $value, 'Survey', $event->get('survey'),$default);
