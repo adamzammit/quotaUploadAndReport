@@ -10,7 +10,7 @@
 </ul>
 <?php if(!empty($aDailyResponses)){
     Yii::app()->getController()->renderPartial("adminStats.views.subviews.participation_rate",array(
-        'title'=>gT("Taux de participation"),
+        'title'=>gT("Participation journalière"),
         'type'=>'',
         'aResponses'=>$aDailyResponses,
         'oSurvey'=>$oSurvey,
@@ -18,7 +18,7 @@
 }?>
 <?php if(!empty($aDailyEnter)){
     Yii::app()->getController()->renderPartial("adminStats.views.subviews.participation_rate",array(
-        'title'=>gT("Taux d'entrée journalier"),
+        'title'=>gT("Nombre de connexions"),
         'type'=>'enter',
         'aResponses'=>$aDailyEnter,
         'oSurvey'=>$oSurvey,
