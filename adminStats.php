@@ -431,7 +431,7 @@ class adminStats extends \ls\pluginmanager\PluginBase
             {
                 $this->aRenderData['aDailyEnter']=$this->getDailyResponsesRate($this->iSurveyId,'startdate');
             }
-            if($this->get("dailyRateAction","Survey",$oSurvey->sid,0))
+            if(false && $this->get("dailyRateAction","Survey",$oSurvey->sid,0))
             {
                 $this->aRenderData['aDailyAction']=$this->getDailyResponsesRate($this->iSurveyId,'datestamp');
             }
@@ -472,16 +472,20 @@ class adminStats extends \ls\pluginmanager\PluginBase
                     /* The list */
                     $aTokenValues=$this->getTokenValues($tokenCross);
                     $aData=array();
+                    $globalMax=0;
                     foreach($aTokenValues as $sTokenValue)
                     {
+                        $max=Token::model($iSurveyId)->count("$tokenCross=:tokenvalue",array(":tokenvalue"=>$sTokenValue));
+                        $globalMax+=$max;
                         $aData[]=array(
                             'title'=>viewHelper::flatEllipsizeText($sTokenValue,true,false),
-                            'max'=>Token::model($iSurveyId)->count("$tokenCross=:tokenvalue",array(":tokenvalue"=>$sTokenValue)),
+                            'max'=>$max,
                             'completed'=>Token::model($iSurveyId)->count("$tokenCross=:tokenvalue AND completed!='N' AND completed<>''",array(":tokenvalue"=>$sTokenValue)),
                         );
                     }
                     $aResponses[$tokenCross]=array(
                         'title'=>viewHelper::flatEllipsizeText($aValidAttributes[$tokenCross],true,false),
+                        'max'=>$max,
                         'data'=>$aData,
                     );
                 }

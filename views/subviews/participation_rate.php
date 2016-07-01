@@ -1,7 +1,7 @@
     <h2><?php echo $title; ?></h2>
 
     <?php
-      echo CHtml::tag("div",array("id"=>"chart-daily{$type}",'class'=>'graph jqplot-line'),"",true);
+      echo CHtml::tag("div",array("id"=>"chart-daily{$type}",'class'=>'chart-day graph jqplot-line'),"",true);
     ?>
     <script>
         $(document).ready(function(){
@@ -15,8 +15,16 @@
                 $minDate=(isset($minDate) ? $minDate : $key);
                 $maxDate=$key;
             }
-            $minDate=date('Y-m-d',strtotime($minDate . " -1 days"));
-            $maxDate=date('Y-m-d',strtotime($maxDate . " +1 days"));
+            $minDate=date('Y-m-d',strtotime($minDate . " -1 day"));
+            $maxDate=date('Y-m-d',strtotime($maxDate . " +1 day"));
+            if($oSurvey->startdate && $oSurvey->startdate < $maxDate)
+            {
+              $minDate=date('Y-m-d',strtotime($oSurvey->startdate));
+            }
+            if($oSurvey->expires && $oSurvey->expires > $minDate)
+            {
+              $maxDate=date('Y-m-d',strtotime($oSurvey->expires));
+            }
             ?>
            var chartdaily<?php echo $type; ?>  = $.jqplot('chart-daily<?php echo $type; ?>', [dailyRate], {
               //title: 'Sine Data Renderer',
@@ -38,18 +46,23 @@
                   renderer:$.jqplot.DateAxisRenderer,
                   tickRenderer: $.jqplot.CanvasAxisTickRenderer,
                   tickInterval:'1 day',
-
                   min: '<?php echo $minDate; ?>',
                   max: '<?php echo $maxDate; ?>',
-                  pad:2,
                     tickOptions: {
                         angle: -45,
-                        formatString:'%d/%m/%y'
+                        formatString:'%d/%m/%y',
+                        showMinorTicks:false
                     },
                 },
                 yaxis:{
-                  min: 0,
-                  max: <?php echo ceil(($maxValue+50)/100)*100; ?>
+                  tickRenderer: $.jqplot.AxisTickRenderer,
+                  tickOptions: {
+                    showMark:false,
+                    showGridline:false,
+                    showLabel:false,
+                  },
+                  pad:1.4,
+                  min: 0
                 }
               }
           });

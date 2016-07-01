@@ -12,21 +12,24 @@
     Yii::app()->getController()->renderPartial("adminStats.views.subviews.participation_rate",array(
         'title'=>gT("Taux de participation"),
         'type'=>'',
-        'aResponses'=>$aDailyResponses
+        'aResponses'=>$aDailyResponses,
+        'oSurvey'=>$oSurvey,
     ));
 }?>
 <?php if(!empty($aDailyEnter)){
     Yii::app()->getController()->renderPartial("adminStats.views.subviews.participation_rate",array(
         'title'=>gT("Taux d'entrée journalier"),
         'type'=>'enter',
-        'aResponses'=>$aDailyEnter
+        'aResponses'=>$aDailyEnter,
+        'oSurvey'=>$oSurvey,
     ));
 }?>
 <?php if(!empty($aDailyAction)){
     Yii::app()->getController()->renderPartial("adminStats.views.subviews.participation_rate",array(
         'title'=>gT("Taux d'action journalier"),
         'type'=>'action',
-        'aResponses'=>$aDailyAction
+        'aResponses'=>$aDailyAction,
+        'oSurvey'=>$oSurvey,
     ));
 }?>
     <h2><?php echo gT("Taux de participations"); ?></h2>
