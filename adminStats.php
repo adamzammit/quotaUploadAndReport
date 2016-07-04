@@ -42,6 +42,18 @@ class adminStats extends \ls\pluginmanager\PluginBase
             'type' => 'info',
             'content' => '',
         ),
+        'dailyRateEnterAllow'=>array(
+            'type'=>'checkbox',
+            'label'=>"Activer le taux d'entrée journalier",
+            'help'=>"Ceci va activer ou non la possibilté dans la gestion du questionnaire",
+            'default'=>1,
+        ),
+        'dailyRateActionAllow'=>array(
+            'type'=>'checkbox',
+            'label'=>"Activer le taux d'action journalier",
+            'help'=>"Ceci va activer ou non la possibilté dans la gestion du questionnaire",
+            'default'=>0,
+        ),
     );
 
     public function init()
@@ -100,33 +112,58 @@ class adminStats extends \ls\pluginmanager\PluginBase
             'content'=>"<h5 class='alert alert-info'>Onglet participation</h5>"
         );
         if($oSurvey->datestamp=="Y"){
+            $aSettings["participationComment"]=array(
+                'type'=>'html',
+                'label'=>"Zone de commentaires pour la participation",
+                'current'=>$this->get("participationComment","Survey",$oEvent->get('survey'),""),
+                'height'=>'8em',
+                'editorOptions'=>array(
+                    'link'=>false,
+                    'image'=>false,
+                ),
+            );
             $aSettings["dailyRate"]=array(
                 'type'=>'select',
-                'label'=>"Montrer le taux de réponse finalisé journalier",
+                'label'=>"Montrer le nombre de réponses finalisées journalier",
                 'options'=>array(
                     '1'=>gT('Yes'),
                     '0'=>gT('No'),
                 ),
                 'current'=>$this->get("dailyRate","Survey",$oEvent->get('survey'),1),
             );
-            $aSettings["dailyRateEnter"]=array(
+            $aSettings["dailyRateCumulative"]=array(
                 'type'=>'select',
-                'label'=>"Montrer le taux d'entrée journalier",
+                'label'=>"Montrer le nombre de réponses finalisées cumulées journalier",
                 'options'=>array(
                     '1'=>gT('Yes'),
                     '0'=>gT('No'),
                 ),
-                'current'=>$this->get("dailyRateEnter","Survey",$oEvent->get('survey'),0),
+                'current'=>$this->get("dailyRateCumulative","Survey",$oEvent->get('survey'),0),
             );
-            //~ $aSettings["dailyRateAction"]=array(
-                //~ 'type'=>'select',
-                //~ 'label'=>"Montrer le taux d'action journalier",
-                //~ 'options'=>array(
-                    //~ '1'=>gT('Yes'),
-                    //~ '0'=>gT('No'),
-                //~ ),
-                //~ 'current'=>$this->get("dailyRateAction","Survey",$oEvent->get('survey'),0),
-            //~ );
+            if($this->get('dailyRateEnterAllow',null,null,$this->settings['dailyRateEnterAllow']['default']))
+            {
+                $aSettings["dailyRateEnter"]=array(
+                    'type'=>'select',
+                    'label'=>"Montrer le nombre d'entrées journalier",
+                    'options'=>array(
+                        '1'=>gT('Yes'),
+                        '0'=>gT('No'),
+                    ),
+                    'current'=>$this->get("dailyRateEnter","Survey",$oEvent->get('survey'),0),
+                );
+            }
+            if($this->get('dailyRateActionAllow',null,null,$this->settings['dailyRateActionAllow']['default']))
+            {
+                $aSettings["dailyRateAction"]=array(
+                    'type'=>'select',
+                    'label'=>"Montrer le nombre d'actions journalier",
+                    'options'=>array(
+                        '1'=>gT('Yes'),
+                        '0'=>gT('No'),
+                    ),
+                    'current'=>$this->get("dailyRateAction","Survey",$oEvent->get('survey'),0),
+                );
+            }
         }else{
             $aSettings["dailyRate"]=array(
                 'type'=>'info',
@@ -209,6 +246,7 @@ class adminStats extends \ls\pluginmanager\PluginBase
         $oCriteria->addInCondition("type",array("L","!","F","N","K","A","B",";")); // see "*"
         $oCriteria->order='group_order ASC, question_order ASC';
         $aoNumericPossibleQuestion=Question::model()->with('groups')->findAll($oCriteria);
+
         $aQuestionNumeric=array();
         foreach($aoNumericPossibleQuestion as $oQuestion)
         {
@@ -284,6 +322,17 @@ class adminStats extends \ls\pluginmanager\PluginBase
                 'type'=>'info',
                 'content'=>"<h5 class='alert alert-info'>Onglet satisfaction</h5>"
             );
+            $aSettings["satisfactionComment"]=array(
+                'type'=>'html',
+                'label'=>"Zone de commentaires pour la satisfaction",
+                'current'=>$this->get("satisfactionComment","Survey",$oEvent->get('survey'),""),
+                'height'=>'8em',
+                'editorOptions'=>array(
+                    'link'=>false,
+                    'image'=>false,
+                ),
+            );
+
             $aSettings["questionNumeric"]=array(
                 'type'=>'select',
                 'label'=>"Question pour les moyennes",
@@ -435,20 +484,38 @@ class adminStats extends \ls\pluginmanager\PluginBase
         $oSurvey=$this->aRenderData['oSurvey'];
         if($oSurvey->datestamp=="Y")
         {
-            if($this->get("dailyRate","Survey",$oSurvey->sid,1))
+            if($this->get("dailyRate","Survey",$oSurvey->sid,1) )
             {
-                $this->aRenderData['aDailyResponses']=$this->getDailyResponsesRate($this->iSurveyId);
+                $aDailyResponses=$this->aRenderData['aDailyResponses']=$this->getDailyResponsesRate($this->iSurveyId);
+
             }
-            if($this->get("dailyRateEnter","Survey",$oSurvey->sid,0))
+            if($this->get("dailyRateCumulative","Survey",$oSurvey->sid,1) )
+            {
+                $aDailyResponses=isset($aDailyResponses) ? $aDailyResponses : $this->getDailyResponsesRate($this->iSurveyId);
+                if(!empty($aDailyResponses))
+                {
+                    $aDailyResponsesCumulative=array();
+                    $sum=0;
+                    foreach($aDailyResponses as $date=>$nb)
+                    {
+                        $sum+=$nb;
+                        $aDailyResponsesCumulative[$date]=$sum;
+                    }
+                    $this->aRenderData['aDailyResponsesCumulative']=$aDailyResponsesCumulative;
+                }
+            }
+            if($this->get("dailyRateEnter","Survey",$oSurvey->sid,0) && $this->get("dailyRateEnterAllow",null,null,$this->settings['dailyRateEnterAllow']['default']))
             {
                 $this->aRenderData['aDailyEnter']=$this->getDailyResponsesRate($this->iSurveyId,'startdate');
             }
-            if(false && $this->get("dailyRateAction","Survey",$oSurvey->sid,0))
+            if( $this->get("dailyRateAction","Survey",$oSurvey->sid,0) && $this->get("dailyRateActionAllow",null,null,$this->settings['dailyRateActionAllow']['default']))
             {
                 $this->aRenderData['aDailyAction']=$this->getDailyResponsesRate($this->iSurveyId,'datestamp');
             }
         }
         $this->aRenderData['aResponses']=$this->getParticipationRate($this->iSurveyId);
+        $this->aRenderData['htmlComment']=$this->get("participationComment","Survey",$oSurvey->sid,"");
+
         $this->render('participation');
     }
 
@@ -783,6 +850,7 @@ class adminStats extends \ls\pluginmanager\PluginBase
             }
         }
         $this->aRenderData['aResponses']=$aResponses;
+        $this->aRenderData['htmlComment']=$this->get("satisfactionComment","Survey",$oSurvey->sid,"");
 
         $this->render('satisfaction');
     }

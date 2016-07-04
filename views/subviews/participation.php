@@ -8,13 +8,29 @@
   <li role="presentation"><?php echo CHtml::link(gT("Administration"),array("admin/survey","sa"=>"editsurveysettings","surveyid"=>$oSurvey->sid,'#'=>'pluginsettings')); ?></a></li>
   <?php } ?>
 </ul>
+<?php
+    if(!empty($htmlComment))
+    {
+         echo CHtml::tag("div",array("class"=>'well clearfix'),$htmlComment);
+    }
+?>
 <?php if(!empty($aDailyResponses)){
     Yii::app()->getController()->renderPartial("adminStats.views.subviews.participation_rate",array(
         'title'=>gT("Participation journalière"),
         'type'=>'',
         'aResponses'=>$aDailyResponses,
         'oSurvey'=>$oSurvey,
-        'showAdmin'=>$showAdmin,
+        'showExport'=>$showAdmin,
+        'showSum'=>true,
+    ));
+}?>
+<?php if(!empty($aDailyResponsesCumulative)){
+    Yii::app()->getController()->renderPartial("adminStats.views.subviews.participation_rate",array(
+        'title'=>gT("Participation journalière cumulée"),
+        'type'=>'cumul',
+        'aResponses'=>$aDailyResponsesCumulative,
+        'oSurvey'=>$oSurvey,
+        'showExport'=>false,
     ));
 }?>
 <?php if(!empty($aDailyEnter)){
@@ -23,7 +39,7 @@
         'type'=>'enter',
         'aResponses'=>$aDailyEnter,
         'oSurvey'=>$oSurvey,
-        'showAdmin'=>$showAdmin,
+        'showExport'=>$showAdmin,
     ));
 }?>
 <?php if(!empty($aDailyAction)){
@@ -32,11 +48,10 @@
         'type'=>'action',
         'aResponses'=>$aDailyAction,
         'oSurvey'=>$oSurvey,
-        'showAdmin'=>$showAdmin,
+        'showExport'=>$showAdmin,
     ));
 }?>
     <h2><?php echo gT("Taux de participations"); ?></h2>
-
 <?php foreach($aResponses as $aResponse){ ?>
     <table class="table table-bordered <?php echo ($aResponse['max']>0) ? "" :" nopercentage"; ?>">
         <thead>

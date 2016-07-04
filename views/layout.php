@@ -19,7 +19,7 @@
  */
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<?php echo App()->getLanguage(); ?>">
   <head>
     <!-- Meta, title, CSS, favicons, etc. -->
     <meta charset="utf-8">

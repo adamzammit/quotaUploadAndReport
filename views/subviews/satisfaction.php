@@ -8,6 +8,12 @@
   <li role="presentation"><?php echo CHtml::link(gT("Administration"),array("admin/survey","sa"=>"editsurveysettings","surveyid"=>$oSurvey->sid,'#'=>'pluginsettings')); ?></a></li>
   <?php } ?>
 </ul>
+<?php
+    if(!empty($htmlComment))
+    {
+         echo CHtml::tag("div",array("class"=>'well clearfix'),$htmlComment);
+    }
+?>
 <?php /* inverse data */
   $aReorederSatisfactions=array();
   foreach($aResponses as $repKey=>$aResponse){
