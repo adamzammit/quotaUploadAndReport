@@ -39,7 +39,7 @@ class translate
      */
     public function gT($string)
     {
-        if(isset($this->aTranslation[$string][App()->language])){
+        if(isset($this->aTranslation[App()->language][$string])){
             return gT($this->aTranslation[App()->language][$string]);
         }
         return gT($string);

@@ -835,6 +835,7 @@ class adminStats extends \ls\pluginmanager\PluginBase
         /* Type tableau */
         $aQuestionsCrossTable=$this->get("questionCrossSatisfactionTable","Survey",$this->iSurveyId);
         $aAllQuestionsCross=array_intersect($aAllSingleQuestion,array_unique(array_merge($aQuestionsCross,$aQuestionsCrossTable)));
+
         /* merge grahique + tableau */
         /* All question filter array */
 
@@ -845,7 +846,7 @@ class adminStats extends \ls\pluginmanager\PluginBase
             $oCriteria->params[':sid'] = $oSurvey->sid;
             $oCriteria->params[':language'] = $this->surveyLanguage;
             $oCriteria->addInCondition("type",array("L","!"));
-            $oCriteria->addInCondition("qid",$aQuestionsCross);
+            $oCriteria->addInCondition("qid",$aAllQuestionsCross);
             $oCriteria->order='group_order ASC, question_order ASC';
             $aoSingleQuestion=Question::model()->with('groups')->findAll($oCriteria);
             if(!empty($aoSingleQuestion))
