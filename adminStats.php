@@ -7,7 +7,7 @@
  * @copyright 2016 Advantage <http://www.advantage.fr>
 
  * @license GPL v3
- * @version 0.0.1
+ * @version 0.1.0
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -377,12 +377,21 @@ class adminStats extends \ls\pluginmanager\PluginBase
             {
                 $aSettings["questionCrossSatisfaction"]=array(
                     'type'=>'select',
-                    'label'=>"Question pour les croisements de satisfaction",
+                    'label'=>"Question pour les croisements de satisfaction (en graphique)",
                     'options'=>CHtml::listData($aoSingleQuestion,'qid',function($oSingleQuestion) {return "[".$oSingleQuestion->title."] ".viewHelper::flatEllipsizeText($oSingleQuestion->question,1,80,"...",0.6);}),
                     'htmlOptions'=>array(
                         'multiple'=>'multiple',
                     ),
                     'current'=>$this->get("questionCrossSatisfaction","Survey",$oEvent->get('survey')),
+                );
+                $aSettings["questionCrossSatisfactionTable"]=array(
+                    'type'=>'select',
+                    'label'=>"Question pour les croisements de satisfaction (en tableau)",
+                    'options'=>CHtml::listData($aoSingleQuestion,'qid',function($oSingleQuestion) {return "[".$oSingleQuestion->title."] ".viewHelper::flatEllipsizeText($oSingleQuestion->question,1,80,"...",0.6);}),
+                    'htmlOptions'=>array(
+                        'multiple'=>'multiple',
+                    ),
+                    'current'=>$this->get("questionCrossSatisfactionTable","Survey",$oEvent->get('survey')),
                 );
             }
         }
@@ -401,6 +410,7 @@ class adminStats extends \ls\pluginmanager\PluginBase
         $aSettings['questionNumeric'] = isset($aSettings['questionNumeric']) ? $aSettings['questionNumeric'] : null;
         $aSettings['tokenAttributesSatisfaction'] = isset($aSettings['tokenAttributesSatisfaction']) ? $aSettings['tokenAttributesSatisfaction'] : null;
         $aSettings['questionCrossSatisfaction'] = isset($aSettings['questionCrossSatisfaction']) ? $aSettings['questionCrossSatisfaction'] : null;
+        $aSettings['questionCrossSatisfactionTable'] = isset($aSettings['questionCrossSatisfactionTable']) ? $aSettings['questionCrossSatisfactionTable'] : null;
 
         foreach ($aSettings as $name => $value)
         {
@@ -751,7 +761,6 @@ class adminStats extends \ls\pluginmanager\PluginBase
                 }
             }
         }
-        //tracevar($aDataInfos);
         if(!empty($aData))
         {
             $aResponses['total']=array(
@@ -811,8 +820,25 @@ class adminStats extends \ls\pluginmanager\PluginBase
 
 
         }
+        /* Recup all question */
+        $oCriteria=new CdbCriteria();
+        $oCriteria->condition="t.sid=:sid and t.language=:language";
+        $oCriteria->select="qid";
+        $oCriteria->params[':sid'] = $oSurvey->sid;
+        $oCriteria->params[':language'] = $oSurvey->language;
+        $oCriteria->addInCondition("type",array("L","!")); // see "*"
+        $oCriteria->order='group_order ASC, question_order ASC';
+        $aoAllSingleQuestion=Question::model()->with('groups')->findAll($oCriteria);
+        $aAllSingleQuestion=CHtml::listData($aoAllSingleQuestion,'qid','qid');
+        /* Type graphique */
         $aQuestionsCross=$this->get("questionCrossSatisfaction","Survey",$this->iSurveyId);
-        if(!empty($aDataInfos) && !empty($aQuestionsCross))
+        /* Type tableau */
+        $aQuestionsCrossTable=$this->get("questionCrossSatisfactionTable","Survey",$this->iSurveyId);
+        $aAllQuestionsCross=array_intersect($aAllSingleQuestion,array_unique(array_merge($aQuestionsCross,$aQuestionsCrossTable)));
+        /* merge grahique + tableau */
+        /* All question filter array */
+
+        if(!empty($aDataInfos) && !empty($aAllQuestionsCross))
         {
             $oCriteria=new CdbCriteria();
             $oCriteria->condition="t.sid=:sid and t.language=:language";
@@ -863,10 +889,20 @@ class adminStats extends \ls\pluginmanager\PluginBase
                             );
                         }
                     }
-                    $aResponses[$sColumn]=array(
-                        'title'=>viewHelper::flatEllipsizeText($oSingleQuestion->question,true,false),
-                        'aSatisfactions'=>$aSatisfaction,
-                    );
+                    if(in_array($oSingleQuestion->qid,$aQuestionsCross)){
+                        $aResponses[$sColumn."_graph"]=array(
+                            'title'=>viewHelper::flatEllipsizeText($oSingleQuestion->question,true,false),
+                            'aSatisfactions'=>$aSatisfaction,
+                            'type'=>'graph',
+                        );
+                    }
+                    if(in_array($oSingleQuestion->qid,$aQuestionsCrossTable)){
+                        $aResponses[$sColumn."_table"]=array(
+                            'title'=>viewHelper::flatEllipsizeText($oSingleQuestion->question,true,false),
+                            'aSatisfactions'=>$aSatisfaction,
+                            'type'=>'table',
+                        );
+                    }
                 }
             }
         }
