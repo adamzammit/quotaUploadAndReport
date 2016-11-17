@@ -16,51 +16,55 @@
 ?>
 <?php if(!empty($aDailyResponses)){
     Yii::app()->getController()->renderPartial("adminStats.views.subviews.participation_rate",array(
-        'title'=>gT("Participation journalière"),
+        'title'=>$translate->gT("Daily participation"),
         'type'=>'',
         'aResponses'=>$aDailyResponses,
         'oSurvey'=>$oSurvey,
         'showExport'=>$showAdmin,
         'showSum'=>true,
+        'translate'=>$translate,
     ));
 }?>
 <?php if(!empty($aDailyResponsesCumulative)){
     Yii::app()->getController()->renderPartial("adminStats.views.subviews.participation_rate",array(
-        'title'=>gT("Participation journalière cumulée"),
+        'title'=>$translate->gT("Daily participation (cumulative)"),
         'type'=>'cumul',
         'aResponses'=>$aDailyResponsesCumulative,
         'oSurvey'=>$oSurvey,
         'showExport'=>false,
+        'translate'=>$translate,
     ));
 }?>
 <?php if(!empty($aDailyEnter)){
     Yii::app()->getController()->renderPartial("adminStats.views.subviews.participation_rate",array(
-        'title'=>gT("Nombre de connexions"),
+        'title'=>$translate->gT("Nombre de connexions"),
         'type'=>'enter',
         'aResponses'=>$aDailyEnter,
         'oSurvey'=>$oSurvey,
         'showExport'=>$showAdmin,
+        'translate'=>$translate,
     ));
 }?>
 <?php if(!empty($aDailyAction)){
     Yii::app()->getController()->renderPartial("adminStats.views.subviews.participation_rate",array(
-        'title'=>gT("Taux d'action journalier"),
+        'title'=>$translate->gT("Taux d'action journalier"),
         'type'=>'action',
         'aResponses'=>$aDailyAction,
         'oSurvey'=>$oSurvey,
         'showExport'=>$showAdmin,
+        'translate'=>$translate,
     ));
 }?>
-    <h2><?php echo gT("Taux de participations"); ?></h2>
+    <h2><?php echo $translate->gT("Participation rate"); ?></h2>
 <?php foreach($aResponses as $aResponse){ ?>
     <table class="table table-bordered <?php echo ($aResponse['max']>0) ? "" :" nopercentage"; ?>">
         <thead>
             <tr class="header">
                 <?php
                 echo CHtml::tag("th",array("class"=>'answer'),$aResponse['title']);
-                echo CHtml::tag("td",array("class"=>"cell nbsend"),($aResponse['max']>0) ? gT("Nombre d'envois") :"");
+                echo CHtml::tag("td",array("class"=>"cell nbsend"),($aResponse['max']>0) ? $translate->gT("Mails sent") :"");
                 echo CHtml::tag("td",array("class"=>"cell response"),gT("Responses"));
-                echo CHtml::tag("td",array("class"=>"cell rate"),($aResponse['max']>0) ? gT("Taux de participation") :"");
+                echo CHtml::tag("td",array("class"=>"cell rate"),($aResponse['max']>0) ? $translate->gT("Participation rate") :"");
                 ?>
             </tr>
         </thead>

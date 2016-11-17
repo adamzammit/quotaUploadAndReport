@@ -1,11 +1,11 @@
 <h1><?php echo $titre; ?></h1>
 <ul class="nav nav-tabs">
-  <li role="presentation"><?php echo CHtml::link(gT("Participation"),array("plugins/direct","plugin"=>"adminStats","function"=>"participation","sid"=>$oSurvey->sid)); ?></li>
+  <li role="presentation"><?php echo CHtml::link($translate->gT("Participation"),array("plugins/direct","plugin"=>"adminStats","function"=>"participation","sid"=>$oSurvey->sid)); ?></li>
   <?php if($showSatisfaction) { ?>
-  <li role="presentation" class="active"><a href="#"><?php echo gT("Satisfaction") ?></a></li>
+  <li role="presentation" class="active"><a href="#"><?php echo $translate->gT("Satisfaction") ?></a></li>
   <?php } ?>
   <?php if($showAdminSurvey) { ?>
-  <li role="presentation"><?php echo CHtml::link(gT("Administration"),array("admin/survey","sa"=>"editsurveysettings","surveyid"=>$oSurvey->sid,'#'=>'pluginsettings')); ?></a></li>
+  <li role="presentation"><?php echo CHtml::link($translate->gT("Administration"),array("admin/survey","sa"=>"editsurveysettings","surveyid"=>$oSurvey->sid,'#'=>'pluginsettings')); ?></a></li>
   <?php } ?>
 </ul>
 <?php
