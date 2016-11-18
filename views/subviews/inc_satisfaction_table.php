@@ -15,7 +15,7 @@
                 <?php
                 echo CHtml::tag("th",array("class"=>'answer'),$aData['title']);
                 echo CHtml::tag("td",array("class"=>"cell response"),$aData['count']);
-                echo CHtml::tag("td",array("class"=>"cell satisfaction",'title'=>$aData['average']),number_format($aData['average'],2));
+                echo CHtml::tag("td",array("class"=>"cell satisfaction",'title'=>$aData['average']),($aData['average']) ? number_format($aData['average'],2) : "" );
                 ?>
             </tr>
         <?php } ?>

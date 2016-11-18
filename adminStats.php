@@ -7,7 +7,7 @@
  * @copyright 2016 Advantage <http://www.advantage.fr>
 
  * @license GPL v3
- * @version 0.1.0
+ * @version 0.1.1
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -751,7 +751,7 @@ class adminStats extends \ls\pluginmanager\PluginBase
                             'max'=>max($maxByQuestion,$this->getMax($sColumnName)),
                             'datas'=>array(
                                 array(
-                                    'title'=>gT("Total Population"),
+                                    'title'=>$this->translate->gT("Total Population"),
                                     'count'=>$iCount,
                                     'average'=>$this->getAverage($sColumnName),
                                 ),
@@ -831,9 +831,9 @@ class adminStats extends \ls\pluginmanager\PluginBase
         $aoAllSingleQuestion=Question::model()->with('groups')->findAll($oCriteria);
         $aAllSingleQuestion=CHtml::listData($aoAllSingleQuestion,'qid','qid');
         /* Type graphique */
-        $aQuestionsCross=$this->get("questionCrossSatisfaction","Survey",$this->iSurveyId);
+        $aQuestionsCross=(array)$this->get("questionCrossSatisfaction","Survey",$this->iSurveyId);
         /* Type tableau */
-        $aQuestionsCrossTable=$this->get("questionCrossSatisfactionTable","Survey",$this->iSurveyId);
+        $aQuestionsCrossTable=(array)$this->get("questionCrossSatisfactionTable","Survey",$this->iSurveyId);
         $aAllQuestionsCross=array_intersect($aAllSingleQuestion,array_unique(array_merge($aQuestionsCross,$aQuestionsCrossTable)));
 
         /* merge grahique + tableau */
