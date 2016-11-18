@@ -2,11 +2,10 @@
     echo CHtml::tag("h2",array("class"=>''),$title);
     if(!empty($showSum))
     {
-      echo CHtml::tag("h4",array("class"=>''),sprintf(gT("Nombre total : %s"),array_sum($aResponses)));
+      echo CHtml::tag("h4",array("class"=>''),sprintf($translate->gT("Total responses: %s"),array_sum($aResponses)));
     }
       echo CHtml::tag("div",array("id"=>"chart-daily{$type}",'class'=>'chart-day graph jqplot-line'),"",true);
-
-       echo CHtml::link(gT("Export"),App()->createUrl('plugins/direct', array('plugin' => 'adminStats', 'function' => 'export','sid'=>$oSurvey->sid,'export'=>"dayresponse",'state'=>$type)),array());
+      echo CHtml::link(gT("Export"),App()->createUrl('plugins/direct', array('plugin' => 'adminStats', 'function' => 'export','sid'=>$oSurvey->sid,'export'=>"dayresponse",'state'=>$type)),array());
     ?>
     <script>
         $(document).ready(function(){

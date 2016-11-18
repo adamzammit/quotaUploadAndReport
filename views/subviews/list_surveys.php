@@ -35,13 +35,13 @@
             array(
                 'name'=>'responsesCount',
                 'sortable'=>true,
-                'header'=>gT("Responses"),
+                'header'=>$translate->gT("Responses"),
                 'value'=>'$data["responsesCount"]',
             ),
             array(
                 'name'=>'tokensCount',
                 'sortable'=>true,
-                'header'=>gT("Nombre d'envois"),
+                'header'=>$translate->gT("Mails sent"),
                 'value'=>'($data["tokensCount"] ? $data["tokensCount"] : "/");',
             ),
         ),

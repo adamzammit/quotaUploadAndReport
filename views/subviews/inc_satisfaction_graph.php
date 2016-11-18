@@ -1,25 +1,11 @@
-<h1><?php echo $titre; ?></h1>
-<ul class="nav nav-tabs">
-  <li role="presentation"><?php echo CHtml::link($translate->gT("Participation"),array("plugins/direct","plugin"=>"adminStats","function"=>"participation","sid"=>$oSurvey->sid)); ?></li>
-  <?php if($showSatisfaction) { ?>
-  <li role="presentation" class="active"><a href="#"><?php echo $translate->gT("Satisfaction") ?></a></li>
-  <?php } ?>
-  <?php if($showAdminSurvey) { ?>
-  <li role="presentation"><?php echo CHtml::link($translate->gT("Administration"),array("admin/survey","sa"=>"editsurveysettings","surveyid"=>$oSurvey->sid,'#'=>'pluginsettings')); ?></a></li>
-  <?php } ?>
-</ul>
-
-<?php foreach($aResponses as $repKey=>$aResponse){ ?>
-  <h2><?php echo $aResponse['title'] ?></h2>
-  <?php foreach($aResponse['aSatisfactions'] as $iSatId=>$aSatisfaction){ ?>
-    <h3><?php echo $aSatisfaction['title'] ?></h2>
+    <h3><?php echo $aResponse['title'] ?></h3>
     <?php
       echo CHtml::tag("div",array("id"=>"chart-r{$repKey}-s{$iSatId}",'class'=>'graph'),"",true);
     ?>
     <?php
       $aLabels=array();
       $aAverage=array();
-      foreach($aSatisfaction['datas'] as $aDatas) {
+      foreach($aResponse['datas'] as $aDatas) {
         $aLabels[]="{$aDatas['title']} ({$aDatas['count']})";
         $aAverage[]=$aDatas['average'];
 
@@ -39,7 +25,8 @@
                 pointLabels: {
                   show: true,
                   location: 's',
-                  formatString: "%#.2f"
+                  formatString: "%#.2f",
+                  color:'#ffffff'
                 }
             },
             grid:{
@@ -57,15 +44,11 @@
                     tickRenderer: $.jqplot.CanvasAxisTickRenderer
                 },
                 yaxis:{
-                  min:<?php echo $aSatisfaction['min']; ?>,
-                  max:<?php echo $aSatisfaction['max']; ?>
+                  min:<?php echo $aResponse['min']; ?>,
+                  max:<?php echo $aResponse['max']; ?>
                 }
             },
             highlighter: { show: false }
         });
     });
     </script>
-  <?php } ?>
-
-
-<?php } ?>

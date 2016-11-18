@@ -7,7 +7,7 @@
  * @copyright 2016 Advantage <http://www.advantage.fr>
 
  * @license GPL v3
- * @version 0.0.1
+ * @version 0.1.1
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,9 @@ class adminStats extends \ls\pluginmanager\PluginBase
     static protected $description = 'Do the statitics at the Advantage way';
     static protected $name = 'adminStats';
 
+    /**
+     * @var string[] : this answer (label) must be moved at end
+     */
     private $aPushTokenValue=array(
         'Autre',
         'Autres',
@@ -36,7 +39,21 @@ class adminStats extends \ls\pluginmanager\PluginBase
         'other',
         'other',
     );
+    /**
+     * @var array : render Data
+     */
     private $aRenderData = array();
+
+    /**
+     * @var \translate class
+     */
+    private $translate;
+
+    /**
+     * @var string : language for survey
+     */
+    private $surveyLanguage;
+
     protected $settings = array(
         'docu'=>array(
             'type' => 'info',
@@ -60,9 +77,7 @@ class adminStats extends \ls\pluginmanager\PluginBase
     {
 
         $this->subscribe('beforeControllerAction');
-
         //~ $this->subscribe('afterSuccessfulLogin');
-
         $this->subscribe('beforeSurveySettings');
         $this->subscribe('newSurveySettings');
 
@@ -95,7 +110,7 @@ class adminStats extends \ls\pluginmanager\PluginBase
         }
         $aSettings["alternateTitle"]=array(
             'type'=>'string',
-            'label'=>"Titre alternative",
+            'label'=>"Titre alternatif",
             'current'=>$this->get("alternateTitle","Survey",$oEvent->get('survey'),""),
         );
         $aSettings["numberMax"]=array(
@@ -250,7 +265,6 @@ class adminStats extends \ls\pluginmanager\PluginBase
         $aQuestionNumeric=array();
         foreach($aoNumericPossibleQuestion as $oQuestion)
         {
-
             switch($oQuestion->type)
             {
                 case "L":
@@ -363,12 +377,21 @@ class adminStats extends \ls\pluginmanager\PluginBase
             {
                 $aSettings["questionCrossSatisfaction"]=array(
                     'type'=>'select',
-                    'label'=>"Question pour les croisements de satisfaction",
+                    'label'=>"Question pour les croisements de satisfaction (en graphique)",
                     'options'=>CHtml::listData($aoSingleQuestion,'qid',function($oSingleQuestion) {return "[".$oSingleQuestion->title."] ".viewHelper::flatEllipsizeText($oSingleQuestion->question,1,80,"...",0.6);}),
                     'htmlOptions'=>array(
                         'multiple'=>'multiple',
                     ),
                     'current'=>$this->get("questionCrossSatisfaction","Survey",$oEvent->get('survey')),
+                );
+                $aSettings["questionCrossSatisfactionTable"]=array(
+                    'type'=>'select',
+                    'label'=>"Question pour les croisements de satisfaction (en tableau)",
+                    'options'=>CHtml::listData($aoSingleQuestion,'qid',function($oSingleQuestion) {return "[".$oSingleQuestion->title."] ".viewHelper::flatEllipsizeText($oSingleQuestion->question,1,80,"...",0.6);}),
+                    'htmlOptions'=>array(
+                        'multiple'=>'multiple',
+                    ),
+                    'current'=>$this->get("questionCrossSatisfactionTable","Survey",$oEvent->get('survey')),
                 );
             }
         }
@@ -387,6 +410,7 @@ class adminStats extends \ls\pluginmanager\PluginBase
         $aSettings['questionNumeric'] = isset($aSettings['questionNumeric']) ? $aSettings['questionNumeric'] : null;
         $aSettings['tokenAttributesSatisfaction'] = isset($aSettings['tokenAttributesSatisfaction']) ? $aSettings['tokenAttributesSatisfaction'] : null;
         $aSettings['questionCrossSatisfaction'] = isset($aSettings['questionCrossSatisfaction']) ? $aSettings['questionCrossSatisfaction'] : null;
+        $aSettings['questionCrossSatisfactionTable'] = isset($aSettings['questionCrossSatisfactionTable']) ? $aSettings['questionCrossSatisfactionTable'] : null;
 
         foreach ($aSettings as $name => $value)
         {
@@ -437,6 +461,11 @@ class adminStats extends \ls\pluginmanager\PluginBase
             if(tableExists("{{survey_{$oSurvey->sid}}}"))
             {
                 $oSurvey=Survey::model()->with('languagesettings')->find("sid=:sid",array(":sid"=>$this->iSurveyId));
+                if(in_array(App()->language,$oSurvey->getAllLanguages())){
+                    $this->surveyLanguage=App()->language;
+                }else{
+                    $this->surveyLanguage=$oSurvey->language;
+                }
                 $this->aRenderData['titre']=$this->get("alternateTitle","Survey",$oSurvey->sid,"");
                 if(empty($this->aRenderData['titre'])){
                     $this->aRenderData['titre']=$oSurvey->getLocalizedTitle();
@@ -453,6 +482,9 @@ class adminStats extends \ls\pluginmanager\PluginBase
         {
             $sAction=false;
         }
+        Yii::setPathOfAlias('adminStats', dirname(__FILE__));
+        Yii::import("adminStats.translate");
+        $this->aRenderData['translate'] = $this->translate = new translate;
         switch ($sAction)
         {
             case "list":
@@ -530,13 +562,12 @@ class adminStats extends \ls\pluginmanager\PluginBase
             $max=Token::model($iSurveyId)->count();// see with Token::model($iSurveyId)->empty()->count()
         }else{
             $max=$this->get("numberMax","Survey",$iSurveyId,0);
-            $max=($max>1) ? $max : 0;
         }
         $aResponses['total']=array(
-            'title'=>gT("Population"),
+            'title'=>$this->translate->gT("Population"),
             'max'=>$max,
             'data'=>array(
-                array('title'=>gT("Population Totale"),'max'=>$max,'completed'=>Response::model($iSurveyId)->count("submitdate IS NOT NULL")),
+                array('title'=>$this->translate->gT("Total Population"),'max'=>$max,'completed'=>Response::model($iSurveyId)->count("submitdate IS NOT NULL")),
             ),
         );
         /* by token */
@@ -577,7 +608,7 @@ class adminStats extends \ls\pluginmanager\PluginBase
             $oCriteria=new CdbCriteria();
             $oCriteria->condition="t.sid=:sid and t.language=:language";
             $oCriteria->params[':sid'] = $oSurvey->sid;
-            $oCriteria->params[':language'] = $oSurvey->language;
+            $oCriteria->params[':language'] = $this->surveyLanguage;
             $oCriteria->addInCondition("type",array("L","!"));
             $oCriteria->addInCondition("qid",$aQuestionsCross);
             $oCriteria->order='group_order ASC, question_order ASC';
@@ -591,7 +622,7 @@ class adminStats extends \ls\pluginmanager\PluginBase
                     $oAnswers=Answer::model()->findAll(array(
                         'condition'=>"qid=:qid and language=:language",
                         'order'=>"sortorder",
-                        'params'=>array(":qid"=>$oSingleQuestion->qid,":language"=>$oSurvey->language)
+                        'params'=>array(":qid"=>$oSingleQuestion->qid,":language"=>$this->surveyLanguage)
                     ));
                     $globalMax=0;
                     foreach($oAnswers as $oAnswer)
@@ -599,10 +630,10 @@ class adminStats extends \ls\pluginmanager\PluginBase
                         $countCriteria=new CdbCriteria();
                         $countCriteria->condition="submitdate IS NOT NULL";
                         $countCriteria->compare(Yii::app()->db->quoteColumnName($sColumn),$oAnswer->code);
-                        $globalMax+=($oAnswer->assessment_value>1 ? $oAnswer->assessment_value : 0);
+                        $globalMax+=$oAnswer->assessment_value;
                         $aData[]=array(
                             'title'=>viewHelper::flatEllipsizeText($oAnswer->answer,true,false),
-                            'max'=>($oAnswer->assessment_value>1 ? $oAnswer->assessment_value : 0),
+                            'max'=>$oAnswer->assessment_value,
                             'completed'=>Response::model($iSurveyId)->count($countCriteria)
                         );
                     }
@@ -633,18 +664,18 @@ class adminStats extends \ls\pluginmanager\PluginBase
         foreach($aQuestionsNumeric as $iQuestionNumeric)
         {
             /* find the code column */
-            $oQuestion=Question::model()->find("qid=:qid AND language=:language",array(":qid"=>$iQuestionNumeric,":language"=>$oSurvey->language));
+            $oQuestion=Question::model()->find("qid=:qid AND language=:language",array(":qid"=>$iQuestionNumeric,":language"=>$this->surveyLanguage));
             if($oQuestion)
             {
                 $maxByQuestion=0;
                 if($oQuestion->parent_qid)
                 {
-                    $oParentQuestion=Question::model()->find("qid=:qid AND language=:language",array(":qid"=>$oQuestion->parent_qid,":language"=>$oSurvey->language));
+                    $oParentQuestion=Question::model()->find("qid=:qid AND language=:language",array(":qid"=>$oQuestion->parent_qid,":language"=>$this->surveyLanguage));
                     if($oParentQuestion->type==';')
                     {
                         $aoSubQuestionX=Question::model()->findAll(array(
                             'condition'=>"parent_qid=:parent_qid and language=:language and scale_id=:scale_id",
-                            'params'=>array(":parent_qid"=>$oParentQuestion->qid,":language"=>App()->language,":scale_id"=>1),
+                            'params'=>array(":parent_qid"=>$oParentQuestion->qid,":language"=>$this->surveyLanguage,":scale_id"=>1),
                             'index'=>'qid',
                         ));
                         $oCriteria = new CDbCriteria;
@@ -655,7 +686,7 @@ class adminStats extends \ls\pluginmanager\PluginBase
                         if($oExistingAttribute)
                         {
                             $maxByQuestion=intval(substr($oExistingAttribute->value, 4));
-                            $oXQuestion=Question::model()->find("qid=:qid AND language=:language",array(":qid"=>$oExistingAttribute->qid,":language"=>$oSurvey->language));
+                            $oXQuestion=Question::model()->find("qid=:qid AND language=:language",array(":qid"=>$oExistingAttribute->qid,":language"=>$this->surveyLanguage));
                             if($oXQuestion)
                             {
                                 $sColumnName="{$oParentQuestion->sid}X{$oParentQuestion->gid}X{$oParentQuestion->qid}{$oQuestion->title}_{$oXQuestion->title}";
@@ -720,7 +751,7 @@ class adminStats extends \ls\pluginmanager\PluginBase
                             'max'=>max($maxByQuestion,$this->getMax($sColumnName)),
                             'datas'=>array(
                                 array(
-                                    'title'=>gT("Population Totale"),
+                                    'title'=>$this->translate->gT("Total Population"),
                                     'count'=>$iCount,
                                     'average'=>$this->getAverage($sColumnName),
                                 ),
@@ -730,11 +761,10 @@ class adminStats extends \ls\pluginmanager\PluginBase
                 }
             }
         }
-        //tracevar($aDataInfos);
         if(!empty($aData))
         {
             $aResponses['total']=array(
-                'title'=>gT("Population"),
+                'title'=>$this->translate->gT("Population"),
                 'aSatisfactions'=>$aData,
             );
         }
@@ -790,15 +820,33 @@ class adminStats extends \ls\pluginmanager\PluginBase
 
 
         }
-        $aQuestionsCross=$this->get("questionCrossSatisfaction","Survey",$this->iSurveyId);
-        if(!empty($aDataInfos) && !empty($aQuestionsCross))
+        /* Recup all question */
+        $oCriteria=new CdbCriteria();
+        $oCriteria->condition="t.sid=:sid and t.language=:language";
+        $oCriteria->select="qid";
+        $oCriteria->params[':sid'] = $oSurvey->sid;
+        $oCriteria->params[':language'] = $oSurvey->language;
+        $oCriteria->addInCondition("type",array("L","!")); // see "*"
+        $oCriteria->order='group_order ASC, question_order ASC';
+        $aoAllSingleQuestion=Question::model()->with('groups')->findAll($oCriteria);
+        $aAllSingleQuestion=CHtml::listData($aoAllSingleQuestion,'qid','qid');
+        /* Type graphique */
+        $aQuestionsCross=(array)$this->get("questionCrossSatisfaction","Survey",$this->iSurveyId);
+        /* Type tableau */
+        $aQuestionsCrossTable=(array)$this->get("questionCrossSatisfactionTable","Survey",$this->iSurveyId);
+        $aAllQuestionsCross=array_intersect($aAllSingleQuestion,array_unique(array_merge($aQuestionsCross,$aQuestionsCrossTable)));
+
+        /* merge grahique + tableau */
+        /* All question filter array */
+
+        if(!empty($aDataInfos) && !empty($aAllQuestionsCross))
         {
             $oCriteria=new CdbCriteria();
             $oCriteria->condition="t.sid=:sid and t.language=:language";
             $oCriteria->params[':sid'] = $oSurvey->sid;
-            $oCriteria->params[':language'] = $oSurvey->language;
+            $oCriteria->params[':language'] = $this->surveyLanguage;
             $oCriteria->addInCondition("type",array("L","!"));
-            $oCriteria->addInCondition("qid",$aQuestionsCross);
+            $oCriteria->addInCondition("qid",$aAllQuestionsCross);
             $oCriteria->order='group_order ASC, question_order ASC';
             $aoSingleQuestion=Question::model()->with('groups')->findAll($oCriteria);
             if(!empty($aoSingleQuestion))
@@ -809,7 +857,7 @@ class adminStats extends \ls\pluginmanager\PluginBase
                     $oAnswers=Answer::model()->findAll(array(
                         'condition'=>"qid=:qid and language=:language",
                         'order'=>"sortorder",
-                        'params'=>array(":qid"=>$oSingleQuestion->qid,":language"=>$oSurvey->language)
+                        'params'=>array(":qid"=>$oSingleQuestion->qid,":language"=>$this->surveyLanguage)
                     ));
                     $aAnswers=Chtml::listData($oAnswers,'code','answer');
                     $aData=array();
@@ -842,10 +890,20 @@ class adminStats extends \ls\pluginmanager\PluginBase
                             );
                         }
                     }
-                    $aResponses[$sColumn]=array(
-                        'title'=>viewHelper::flatEllipsizeText($oSingleQuestion->question,true,false),
-                        'aSatisfactions'=>$aSatisfaction,
-                    );
+                    if(in_array($oSingleQuestion->qid,$aQuestionsCross)){
+                        $aResponses[$sColumn."_graph"]=array(
+                            'title'=>viewHelper::flatEllipsizeText($oSingleQuestion->question,true,false),
+                            'aSatisfactions'=>$aSatisfaction,
+                            'type'=>'graph',
+                        );
+                    }
+                    if(in_array($oSingleQuestion->qid,$aQuestionsCrossTable)){
+                        $aResponses[$sColumn."_table"]=array(
+                            'title'=>viewHelper::flatEllipsizeText($oSingleQuestion->question,true,false),
+                            'aSatisfactions'=>$aSatisfaction,
+                            'type'=>'table',
+                        );
+                    }
                 }
             }
         }
@@ -1206,5 +1264,4 @@ class adminStats extends \ls\pluginmanager\PluginBase
             return $aTokenValues;
         }
     }
-
 }
