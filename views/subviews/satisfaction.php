@@ -1,11 +1,11 @@
 <h1><?php echo $titre; ?></h1>
 <ul class="nav nav-tabs">
-  <li role="presentation"><?php echo CHtml::link($translate->gT("Participation"),array("plugins/direct","plugin"=>"adminStats","function"=>"participation","sid"=>$oSurvey->sid)); ?></li>
+  <li role="presentation"><?php echo CHtml::link(\Yii::t('',"Participation",array(),$className),array("plugins/direct","plugin"=>$className,"function"=>"participation","sid"=>$oSurvey->sid)); ?></li>
   <?php if($showSatisfaction) { ?>
-  <li role="presentation" class="active"><a href="#"><?php echo $translate->gT("Satisfaction") ?></a></li>
+  <li role="presentation" class="active"><a href="#"><?php echo \Yii::t('',"Satisfaction",array(),$className); ?></a></li>
   <?php } ?>
   <?php if($showAdminSurvey) { ?>
-  <li role="presentation"><?php echo CHtml::link($translate->gT("Administration"),array("admin/survey","sa"=>"editsurveysettings","surveyid"=>$oSurvey->sid,'#'=>'pluginsettings')); ?></a></li>
+  <li role="presentation"><?php echo CHtml::link(\Yii::t('',"Administration",array(),$className),array("admin/survey","sa"=>"view","surveyid"=>$oSurvey->sid)); ?></a></li>
   <?php } ?>
 </ul>
 <?php
@@ -40,20 +40,20 @@
     <?php
       switch($aResponse['type']){
         case 'table':
-          echo Yii::app()->controller->renderPartial("adminStats.views.subviews.inc_satisfaction_table",array(
+          echo Yii::app()->controller->renderPartial("{$className}.views.subviews.inc_satisfaction_table",array(
             'repKey'=>$repKey,
             'iSatId'=>$iSatId,
             'aResponse'=>$aResponse,
-            'translate'=>$translate,
+            'className'=>$className,
           ),true);
           break;
         case 'graph':
         default:
-          echo Yii::app()->controller->renderPartial("adminStats.views.subviews.inc_satisfaction_graph",array(
+          echo Yii::app()->controller->renderPartial("{$className}.views.subviews.inc_satisfaction_graph",array(
             'repKey'=>$repKey,
             'iSatId'=>$iSatId,
             'aResponse'=>$aResponse,
-            'translate'=>$translate,
+            'className'=>$className,
           ),true);
           break;
       }

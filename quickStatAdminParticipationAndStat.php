@@ -7,7 +7,7 @@
  * @copyright 2016 Advantage <http://www.advantage.fr>
 
  * @license AGPL v3
- * @version 1.1.1
+ * @version 2.0.0
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -19,15 +19,16 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-class adminStats extends \ls\pluginmanager\PluginBase
+class quickStatAdminParticipationAndStat extends \ls\pluginmanager\PluginBase
 {
     protected $storage = 'DbStorage';
 
-    static protected $description = 'Do the statitics at the Advantage way';
-    static protected $name = 'adminStats';
+    static protected $description = 'Show some specific statitics to your admin user.';
+    static protected $name = 'quickStatAdminParticipationAndStat';
 
     /**
      * @var string[] : this answer (label) must be moved at end
+     * @todo : move this to settings
      */
     private $aPushTokenValue=array(
         'Autre',
@@ -45,11 +46,6 @@ class adminStats extends \ls\pluginmanager\PluginBase
     private $aRenderData = array();
 
     /**
-     * @var \translate class
-     */
-    private $translate;
-
-    /**
      * @var string : language for survey
      */
     private $surveyLanguage;
@@ -61,14 +57,12 @@ class adminStats extends \ls\pluginmanager\PluginBase
         ),
         'dailyRateEnterAllow'=>array(
             'type'=>'checkbox',
-            'label'=>"Activer le taux d'entrée journalier",
-            'help'=>"Ceci va activer ou non la possibilté dans la gestion du questionnaire",
+            'label'=>"Activate daily participation",
             'default'=>1,
         ),
         'dailyRateActionAllow'=>array(
             'type'=>'checkbox',
-            'label'=>"Activer le taux d'action journalier",
-            'help'=>"Ceci va activer ou non la possibilté dans la gestion du questionnaire",
+            'label'=>"Activate daily action",
             'default'=>0,
         ),
     );
@@ -76,12 +70,19 @@ class adminStats extends \ls\pluginmanager\PluginBase
     public function init()
     {
 
+        /* Disable default admin view */
         $this->subscribe('beforeControllerAction');
         //~ $this->subscribe('afterSuccessfulLogin');
+
+        /* Survey settings */
         $this->subscribe('beforeSurveySettings');
         $this->subscribe('newSurveySettings');
 
+        /* Show page */
         $this->subscribe('newDirectRequest');
+
+        /* register language */
+        $this->subscribe('afterPluginLoad');
 
     }
 
@@ -98,24 +99,25 @@ class adminStats extends \ls\pluginmanager\PluginBase
         {
             $aSettings["statlink"]=array(
                 'type'=>'info',
-                'content'=>"<h5 class='alert alert-info'>Lien vers les statistiques : <a href='{$url}'>{$url}</a></h5>",
+                'content'=>"<h5 class='alert alert-info'>".$this->_translate("Link to statitics :")."<a href='{$url}'>{$url}</a></h5>",
             );
         }
         else
         {
             $aSettings["statlink"]=array(
                 'type'=>'info',
-                'content'=>"<p class='alert alert-info'>Survey is not activated : no statistics can be shown.</p>",
+                'content'=>"<p class='alert alert-info'>".$this->_translate("Survey is not activated : no statistics can be shown.")."</p>",
             );
         }
         $aSettings["alternateTitle"]=array(
             'type'=>'string',
-            'label'=>"Titre alternatif",
+            'label'=>$this->_translate("Alternate title"),
             'current'=>$this->get("alternateTitle","Survey",$oEvent->get('survey'),""),
         );
         $aSettings["numberMax"]=array(
             'type'=>'int',
-            'label'=>"Nombre d'envoi global (sans invitations)",
+            'label'=>$this->_translate("Expected participation"),
+            'help'=>$this->_translate("If survey didn't have token : used for participation rate."),
             'htmlOptions'=>array(
                 'min'=>0,
             ),
@@ -124,12 +126,12 @@ class adminStats extends \ls\pluginmanager\PluginBase
 
         $aSettings["CrossTitle"]=array(
             'type'=>'info',
-            'content'=>"<h5 class='alert alert-info'>Onglet participation</h5>"
+            'content'=>"<h5 class='alert alert-info'>".$this->_translate("Participation tab")."</h5>"
         );
         if($oSurvey->datestamp=="Y"){
             $aSettings["participationComment"]=array(
                 'type'=>'html',
-                'label'=>"Zone de commentaires pour la participation",
+                'label'=>$this->_translate("Description for participation tab"),
                 'current'=>$this->get("participationComment","Survey",$oEvent->get('survey'),""),
                 'height'=>'8em',
                 'editorOptions'=>array(
@@ -139,7 +141,7 @@ class adminStats extends \ls\pluginmanager\PluginBase
             );
             $aSettings["dailyRate"]=array(
                 'type'=>'select',
-                'label'=>"Montrer le nombre de réponses finalisées journalier",
+                'label'=>$this->_translate("Show the number of completed daily responses."),
                 'options'=>array(
                     '1'=>gT('Yes'),
                     '0'=>gT('No'),
@@ -148,7 +150,7 @@ class adminStats extends \ls\pluginmanager\PluginBase
             );
             $aSettings["dailyRateCumulative"]=array(
                 'type'=>'select',
-                'label'=>"Montrer le nombre de réponses finalisées cumulées journalier",
+                'label'=>$this->_translate("Show the number of completed daily cumulative responses."),
                 'options'=>array(
                     '1'=>gT('Yes'),
                     '0'=>gT('No'),
@@ -159,7 +161,7 @@ class adminStats extends \ls\pluginmanager\PluginBase
             {
                 $aSettings["dailyRateEnter"]=array(
                     'type'=>'select',
-                    'label'=>"Montrer le nombre d'entrées journalier",
+                    'label'=>$this->_translate("Show the number of daily entries."),
                     'options'=>array(
                         '1'=>gT('Yes'),
                         '0'=>gT('No'),
@@ -171,7 +173,7 @@ class adminStats extends \ls\pluginmanager\PluginBase
             {
                 $aSettings["dailyRateAction"]=array(
                     'type'=>'select',
-                    'label'=>"Montrer le nombre d'actions journalier",
+                    'label'=>$this->_translate("Show the number of daily activities."),
                     'options'=>array(
                         '1'=>gT('Yes'),
                         '0'=>gT('No'),
@@ -182,7 +184,7 @@ class adminStats extends \ls\pluginmanager\PluginBase
         }else{
             $aSettings["dailyRate"]=array(
                 'type'=>'info',
-                'label'=>"Le questionnaire n'est pas daté: impossible de montrer les taux journalier",
+                'label'=>$this->_translate("Survey are not date stamped: Le questionnaire n'est pas daté: it's not possible to show daily rates."),
             );
         }
         /* Token attribute */
@@ -223,7 +225,7 @@ class adminStats extends \ls\pluginmanager\PluginBase
                 }
                 $aSettings["tokenAttributes"]=array(
                     'type'=>'select',
-                    'label'=>"Attribut d'invitation pour les croisements",
+                    'label'=>$this->_translate("Token attributes for pivot (cross-sectional)"),
                     'options'=>$aOptions,
                     'htmlOptions'=>array(
                         'multiple'=>'multiple',
@@ -245,7 +247,7 @@ class adminStats extends \ls\pluginmanager\PluginBase
         {
             $aSettings["questionCross"]=array(
                 'type'=>'select',
-                'label'=>"Question pour les croisements",
+                'label'=>$this->_translate("Question  for pivot (cross-sectional)"),
                 'options'=>CHtml::listData($aoSingleQuestion,'qid',function($oSingleQuestion) {return "[".$oSingleQuestion->title."] ".viewHelper::flatEllipsizeText($oSingleQuestion->question,1,80,"...",0.6);}),
                 'htmlOptions'=>array(
                     'multiple'=>'multiple',
@@ -335,11 +337,11 @@ class adminStats extends \ls\pluginmanager\PluginBase
         {
             $aSettings["SatTitle"]=array(
                 'type'=>'info',
-                'content'=>"<h5 class='alert alert-info'>Onglet satisfaction</h5>"
+                'content'=>"<h5 class='alert alert-info'>".$this->_translate("Satisfaction tab")."</h5>"
             );
             $aSettings["satisfactionComment"]=array(
                 'type'=>'html',
-                'label'=>"Zone de commentaires pour la satisfaction",
+                'label'=>$this->_translate("Description for satisfaction tab"),
                 'current'=>$this->get("satisfactionComment","Survey",$oEvent->get('survey'),""),
                 'height'=>'8em',
                 'editorOptions'=>array(
@@ -350,7 +352,7 @@ class adminStats extends \ls\pluginmanager\PluginBase
 
             $aSettings["questionNumeric"]=array(
                 'type'=>'select',
-                'label'=>"Question pour les moyennes",
+                'label'=>$this->_translate("Questions of satisfaction"),
                 'options'=>$aQuestionNumeric,
                 'htmlOptions'=>array(
                     'multiple'=>'multiple',
@@ -366,7 +368,7 @@ class adminStats extends \ls\pluginmanager\PluginBase
                 }
                 $aSettings["tokenAttributesSatisfaction"]=array(
                     'type'=>'select',
-                    'label'=>"Attribut d'invitation pour les croisements de satisfaction",
+                    'label'=>$this->_translate("Token attributes for pivot (cross-sectional)"),
                     'options'=>$aOptions,
                     'htmlOptions'=>array(
                         'multiple'=>'multiple',
@@ -378,7 +380,7 @@ class adminStats extends \ls\pluginmanager\PluginBase
             {
                 $aSettings["questionCrossSatisfaction"]=array(
                     'type'=>'select',
-                    'label'=>"Question pour les croisements de satisfaction (en graphique)",
+                    'label'=>$this->_translate("Question for pivot (in graphic)"),
                     'options'=>CHtml::listData($aoSingleQuestion,'qid',function($oSingleQuestion) {return "[".$oSingleQuestion->title."] ".viewHelper::flatEllipsizeText($oSingleQuestion->question,1,80,"...",0.6);}),
                     'htmlOptions'=>array(
                         'multiple'=>'multiple',
@@ -387,7 +389,7 @@ class adminStats extends \ls\pluginmanager\PluginBase
                 );
                 $aSettings["questionCrossSatisfactionTable"]=array(
                     'type'=>'select',
-                    'label'=>"Question pour les croisements de satisfaction (en tableau)",
+                    'label'=>$this->_translate("Question for pivot (in array)"),
                     'options'=>CHtml::listData($aoSingleQuestion,'qid',function($oSingleQuestion) {return "[".$oSingleQuestion->title."] ".viewHelper::flatEllipsizeText($oSingleQuestion->question,1,80,"...",0.6);}),
                     'htmlOptions'=>array(
                         'multiple'=>'multiple',
@@ -483,9 +485,6 @@ class adminStats extends \ls\pluginmanager\PluginBase
         {
             $sAction=false;
         }
-        Yii::setPathOfAlias('adminStats', dirname(__FILE__));
-        Yii::import("adminStats.translate");
-        $this->aRenderData['translate'] = $this->translate = new translate;
         switch ($sAction)
         {
             case "list":
@@ -565,10 +564,10 @@ class adminStats extends \ls\pluginmanager\PluginBase
             $max=$this->get("numberMax","Survey",$iSurveyId,0);
         }
         $aResponses['total']=array(
-            'title'=>$this->translate->gT("Population"),
+            'title'=>$this->_translate("Population"),
             'max'=>$max,
             'data'=>array(
-                array('title'=>$this->translate->gT("Total Population"),'max'=>$max,'completed'=>Response::model($iSurveyId)->count("submitdate IS NOT NULL")),
+                array('title'=>$this->_translate("Total Population"),'max'=>$max,'completed'=>Response::model($iSurveyId)->count("submitdate IS NOT NULL")),
             ),
         );
         /* by token */
@@ -765,7 +764,7 @@ class adminStats extends \ls\pluginmanager\PluginBase
         if(!empty($aData))
         {
             $aResponses['total']=array(
-                'title'=>$this->translate->gT("Population"),
+                'title'=>$this->_translate("Population"),
                 'aSatisfactions'=>$aData,
             );
         }
@@ -933,12 +932,11 @@ class adminStats extends \ls\pluginmanager\PluginBase
                 $state='submitdate';
         }
         $aDatas=$this->getDailyResponsesRate($oSurvey->sid,$state);
-        $aHeader=array(gT("Day"),gT("Nb"));
+        $aHeader=array(gT("Day"),$this->_translate("Nb"));
         header("Content-Disposition: attachment; filename=" . $state.".csv");
         header("Content-type: text/comma-separated-values; charset=UTF-8");
         echo implode(",",$aHeader). PHP_EOL;
-        foreach($aDatas as $key=>$value)
-        {
+        foreach($aDatas as $key=>$value) {
             echo $key.",".$value. PHP_EOL;
         }
         die();
@@ -1016,16 +1014,16 @@ class adminStats extends \ls\pluginmanager\PluginBase
      */
     private function render($fileRender)
     {
-        Yii::setPathOfAlias('adminStats', dirname(__FILE__));
-        Yii::app()->clientScript->addPackage( 'boostrap-adminStats', array(
-            'basePath'    => 'adminStats.vendor.bootstrap',
+        Yii::setPathOfAlias('quickStatAdminParticipationAndStat', dirname(__FILE__));
+        Yii::app()->clientScript->addPackage( 'boostrap-quickStatAdminParticipationAndStat', array(
+            'basePath'    => 'quickStatAdminParticipationAndStat.vendor.bootstrap',
             'css'         => array('css/bootstrap.min.css'),
             'js'          => array('js/bootstrap.min.js'),
             'depends'     => array('jquery')
         ));
         $oEvent=$this->event;
         Yii::app()->controller->layout='bare'; // bare don't have any HTML
-        Yii::app()->getClientScript()->registerPackage('boostrap-adminStats');
+        Yii::app()->getClientScript()->registerPackage('boostrap-quickStatAdminParticipationAndStat');
         $this->aRenderData['assetUrl']=$sAssetUrl=Yii::app()->assetManager->publish(dirname(__FILE__) . '/assets');
         //~ $this->aRenderData['chartjsUrl']=Yii::app()->assetManager->publish(dirname(__FILE__) . '/vendor/Chart.js');
         $this->aRenderData['jqplotUrl']=Yii::app()->assetManager->publish(dirname(__FILE__) . '/vendor/jquery.jqplot');
@@ -1034,8 +1032,8 @@ class adminStats extends \ls\pluginmanager\PluginBase
         $this->aRenderData['showSatisfaction']=count($this->get("questionNumeric","Survey",$this->iSurveyId,array()));
         $this->aRenderData['showAdminSurvey']=Permission::model()->hasSurveyPermission($this->iSurveyId,'surveysettings','update') && !$this->onlyStatAccess();
         $this->aRenderData['showAdmin']=!$this->onlyStatAccess();
-
-        Yii::app()->controller->render("adminStats.views.layout",$this->aRenderData);
+        $this->aRenderData['className']=self::$name;
+        Yii::app()->controller->render("quickStatAdminParticipationAndStat.views.layout",$this->aRenderData);
     }
     /**
      * Return the survey with allowed access
@@ -1078,12 +1076,16 @@ class adminStats extends \ls\pluginmanager\PluginBase
 
 
     /**
-     * Update plugin settings for the link
+     * Update plugin settings for the link and lang
      */
     public function getPluginSettings($getValues=true)
     {
         $url=$this->api->createUrl('plugins/direct', array('plugin' => $this->getName(), 'function' => 'list'));
-        $this->settings['docu']['content']= "<p class='alert alert-info'>The link to the statitsics is : <a href='{$url}'>{$url}</a></p>";
+        $this->settings['docu']['content']= "<p class='alert alert-info'>".$this->_translate("The link to the statistics is:")."<a href='{$url}'>{$url}</a></p>";
+        $this->settings['dailyRateEnterAllow']['label'] = $this->_translate("Activate daily participation");
+        $this->settings['dailyRateEnterAllow']['help'] = $this->_translate("This allow to activate daily participation by survey");
+        $this->settings['dailyRateActionAllow']['label'] = $this->_translate("Activate daily action");
+        $this->settings['dailyRateActionAllow']['help'] = $this->_translate("This allow to activate daily action by survey");
         return parent::getPluginSettings($getValues);
     }
 
@@ -1257,18 +1259,40 @@ class adminStats extends \ls\pluginmanager\PluginBase
             'order'=>$attribute,
             'distinct'=>true,
         ));
-        if($oTokenValues)
-        {
+        if($oTokenValues) {
             $aTokenValues=CHtml::listData($oTokenValues,$attribute,$attribute);
-            foreach($this->aPushTokenValue as $sPushToken)
-            {
-                if(array_key_exists($sPushToken,$aTokenValues))
-                {
+            foreach($this->aPushTokenValue as $sPushToken) {
+                if(array_key_exists($sPushToken,$aTokenValues)) {
                     unset($aTokenValues[$sPushToken]);
                     $aTokenValues[$sPushToken]=$sPushToken;
                 }
             }
             return $aTokenValues;
         }
+    }
+
+    /**
+     * Translate a plugin string
+     * @param string $string to translate
+     * @return string
+     */
+    private function _translate($string){
+        return Yii::t('',$string,array(),self::$name);
+    }
+    /**
+     * Add this translation just after loaded all plugins
+     * @see event afterPluginLoad
+     */
+    public function afterPluginLoad(){
+        $oLang=array(
+            'class' => 'CGettextMessageSource',
+            'cacheID' => self::$name.'Lang',
+            'cachingDuration'=>3600,
+            'forceTranslation' => true,
+            'useMoFile' => true,
+            'basePath' => __DIR__ . DIRECTORY_SEPARATOR.'locale',
+            'catalog'=>'messages',// default from Yii
+        );
+        Yii::app()->setComponent(self::$name,$oLang);
     }
 }

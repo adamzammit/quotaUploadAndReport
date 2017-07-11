@@ -4,8 +4,8 @@
             <tr class="bg-primary">
                 <?php
                 echo CHtml::tag("th",array("class"=>'answer'),"");
-                echo CHtml::tag("td",array("class"=>"cell population"),$translate->gT("Population"));
-                echo CHtml::tag("td",array("class"=>"cell satisfaction"),$translate->gT("Satisfaction"));
+                echo CHtml::tag("td",array("class"=>"cell population"),\Yii::t('',"Population",array(),$className));
+                echo CHtml::tag("td",array("class"=>"cell satisfaction"),\Yii::t('',"Satisfaction",array(),$className));
                 ?>
             </tr>
         </thead>

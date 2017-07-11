@@ -48,14 +48,14 @@
         <div class="container">
            <div class="navbar-header">
               <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-                <span class="sr-only">Toggle navigation</span>
+                <span class="sr-only"><?php \Yii::t('',"Toggle navigation",array(),$className); ?></span>
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
               </button>
                 <?php echo CHtml::link(
                     CHtml::tag("span",array("class"=>''),Yii::app()->getConfig("sitename")),
-                    array("plugins/direct","plugin"=>"adminStats","function"=>"list"),
+                    array("plugins/direct","plugin"=>$className,"function"=>"list"),
                     array("class"=>'navbar-brand')
                 ); ?>
             </div>
@@ -82,7 +82,7 @@
     </nav>
     <div class="container">
       <?php
-        Yii::app()->getController()->renderPartial("adminStats.views.{$subview}",$_data_);
+        Yii::app()->getController()->renderPartial("{$className}.views.{$subview}",$_data_);
       ?>
     </div> <!-- /container -->
 </body>

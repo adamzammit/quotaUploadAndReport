@@ -24,7 +24,7 @@
                 'sortable'=>true,
                 'header'=>gT("ID"),
                 'type' => 'raw',
-                'value'=>'CHtml::link($data["sid"],array("plugins/direct","plugin"=>"adminStats","function"=>"participation","sid"=>$data["sid"]))',
+                'value'=>'CHtml::link($data["sid"],array("plugins/direct","plugin"=>"'.$className.'","function"=>"participation","sid"=>$data["sid"]))',
             ),
             array(
                 'name'=>'surveyls_title',
@@ -35,13 +35,13 @@
             array(
                 'name'=>'responsesCount',
                 'sortable'=>true,
-                'header'=>$translate->gT("Responses"),
+                'header'=>\Yii::t('',"Responses",array(),$className),
                 'value'=>'$data["responsesCount"]',
             ),
             array(
                 'name'=>'tokensCount',
                 'sortable'=>true,
-                'header'=>$translate->gT("Mails sent"),
+                'header'=>\Yii::t('',"Expected participants",array(),$className),
                 'value'=>'($data["tokensCount"] ? $data["tokensCount"] : "/");',
             ),
         ),

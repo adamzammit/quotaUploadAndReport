@@ -1,11 +1,11 @@
 <h1><?php echo $titre; ?></h1>
 <ul class="nav nav-tabs">
-  <li role="presentation" class="active"><a href="#"><?php echo gT("Participation") ?></a></li>
+  <li role="presentation" class="active"><a href="#"><?php echo \Yii::t('',"Participation",array(),$className) ?></a></li>
   <?php if($showSatisfaction) { ?>
-  <li role="presentation"><?php echo CHtml::link(gT("Satisfaction"),array("plugins/direct","plugin"=>"adminStats","function"=>"satisfaction","sid"=>$oSurvey->sid)) ?></li>
+  <li role="presentation"><?php echo CHtml::link(\Yii::t('',"Satisfaction",array(),$className),array("plugins/direct","plugin"=>"{$className}","function"=>"satisfaction","sid"=>$oSurvey->sid)) ?></li>
   <?php } ?>
   <?php if($showAdminSurvey) { ?>
-  <li role="presentation"><?php echo CHtml::link(gT("Administration"),array("admin/survey","sa"=>"editsurveysettings","surveyid"=>$oSurvey->sid,'#'=>'pluginsettings')); ?></a></li>
+  <li role="presentation"><?php echo CHtml::link(gT("Administration"),array("admin/survey","sa"=>"view","surveyid"=>$oSurvey->sid)); ?></a></li>
   <?php } ?>
 </ul>
 <?php
@@ -15,56 +15,56 @@
     }
 ?>
 <?php if(!empty($aDailyResponses)){
-    Yii::app()->getController()->renderPartial("adminStats.views.subviews.participation_rate",array(
-        'title'=>$translate->gT("Daily participation"),
+    Yii::app()->getController()->renderPartial("{$className}.views.subviews.participation_rate",array(
+        'title'=>\Yii::t('',"Daily participation",array(),$className),
         'type'=>'',
         'aResponses'=>$aDailyResponses,
         'oSurvey'=>$oSurvey,
         'showExport'=>$showAdmin,
         'showSum'=>true,
-        'translate'=>$translate,
+        'className'=>$className,
     ));
 }?>
 <?php if(!empty($aDailyResponsesCumulative)){
-    Yii::app()->getController()->renderPartial("adminStats.views.subviews.participation_rate",array(
-        'title'=>$translate->gT("Daily participation (cumulative)"),
+    Yii::app()->getController()->renderPartial("{$className}.views.subviews.participation_rate",array(
+        'title'=>\Yii::t('',("Daily participation (cumulative)"),array(),$className),
         'type'=>'cumul',
         'aResponses'=>$aDailyResponsesCumulative,
         'oSurvey'=>$oSurvey,
         'showExport'=>false,
-        'translate'=>$translate,
+        'className'=>$className,
     ));
 }?>
 <?php if(!empty($aDailyEnter)){
-    Yii::app()->getController()->renderPartial("adminStats.views.subviews.participation_rate",array(
-        'title'=>$translate->gT("Nombre de connexions"),
+    Yii::app()->getController()->renderPartial("{$className}.views.subviews.participation_rate",array(
+        'title'=>\Yii::t('',("Number of connections"),array(),$className),
         'type'=>'enter',
         'aResponses'=>$aDailyEnter,
         'oSurvey'=>$oSurvey,
         'showExport'=>$showAdmin,
-        'translate'=>$translate,
+        'className'=>$className,
     ));
 }?>
 <?php if(!empty($aDailyAction)){
-    Yii::app()->getController()->renderPartial("adminStats.views.subviews.participation_rate",array(
-        'title'=>$translate->gT("Taux d'action journalier"),
+    Yii::app()->getController()->renderPartial("{$className}.views.subviews.participation_rate",array(
+        'title'=>\Yii::t('',("Daily participation rate"),array(),$className),
         'type'=>'action',
         'aResponses'=>$aDailyAction,
         'oSurvey'=>$oSurvey,
         'showExport'=>$showAdmin,
-        'translate'=>$translate,
+        'className'=>$className,
     ));
 }?>
-    <h2><?php echo $translate->gT("Participation rate"); ?></h2>
+    <h2><?php echo \Yii::t('',"Participation rate",array(),$className); ?></h2>
 <?php foreach($aResponses as $aResponse){ ?>
     <table class="table table-bordered <?php echo ($aResponse['max']>0) ? "" :" nopercentage"; ?>">
         <thead>
             <tr class="header">
                 <?php
                 echo CHtml::tag("th",array("class"=>'answer'),$aResponse['title']);
-                echo CHtml::tag("td",array("class"=>"cell nbsend"),($aResponse['max']>0) ? $translate->gT("Mails sent") :"");
+                echo CHtml::tag("td",array("class"=>"cell nbsend"),($aResponse['max']>0) ? \Yii::t('',"Expected participants",array(),$className) :"");
                 echo CHtml::tag("td",array("class"=>"cell response"),gT("Responses"));
-                echo CHtml::tag("td",array("class"=>"cell rate"),($aResponse['max']>0) ? $translate->gT("Participation rate") :"");
+                echo CHtml::tag("td",array("class"=>"cell rate"),($aResponse['max']>0) ? \Yii::t('',"Participation rate",array(),$className) :"");
                 ?>
             </tr>
         </thead>
