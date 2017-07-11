@@ -3,14 +3,14 @@
  * The plugin event redirect system
  *
  * @author Denis Chenu <denis@sondages.pro>
- * @copyright 2016 Denis Chenu <http://www.sondages.pro>
+ * @copyright 2016-2017 Denis Chenu <https://www.sondages.pro>
  * @copyright 2016 Advantage <http://www.advantage.fr>
 
- * @license GPL v3
- * @version 0.1.1
+ * @license AGPL v3
+ * @version 1.1.1
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -296,6 +296,7 @@ class adminStats extends \ls\pluginmanager\PluginBase
                     break;
                 case "F":
                     $iNumAnswers=Answer::model()->count("qid=:qid AND concat('',code * 1) = code",array(":qid"=>$oQuestion->qid));
+                    
                     if($iNumAnswers)
                     {
                         $oSubQuestions=Question::model()->findAll(array("condition"=>"parent_qid=:qid AND language=:language","order"=>"question_order","params"=>array(":qid"=>$oQuestion->qid,":language"=>$oSurvey->language)));
@@ -437,10 +438,10 @@ class adminStats extends \ls\pluginmanager\PluginBase
     {
         Yii::import('application.helpers.viewHelper');
 
-        if ($this->event->get('target') != get_class())
+        if ($this->event->get('target') != get_class()) {
             return;
-        if(Yii::app()->user->getIsGuest())
-        {
+        }
+        if(Yii::app()->user->getIsGuest()) {
           App()->user->setReturnUrl(App()->request->requestUri);
           App()->controller->redirect(array('/admin/authentication'));
         }
@@ -1015,10 +1016,16 @@ class adminStats extends \ls\pluginmanager\PluginBase
      */
     private function render($fileRender)
     {
-        Yii::app()->bootstrap->init();
         Yii::setPathOfAlias('adminStats', dirname(__FILE__));
+        Yii::app()->clientScript->addPackage( 'boostrap-adminStats', array(
+            'basePath'    => 'adminStats.vendor.bootstrap',
+            'css'         => array('css/bootstrap.min.css'),
+            'js'          => array('js/bootstrap.min.js'),
+            'depends'     => array('jquery')
+        ));
         $oEvent=$this->event;
         Yii::app()->controller->layout='bare'; // bare don't have any HTML
+        Yii::app()->getClientScript()->registerPackage('boostrap-adminStats');
         $this->aRenderData['assetUrl']=$sAssetUrl=Yii::app()->assetManager->publish(dirname(__FILE__) . '/assets');
         //~ $this->aRenderData['chartjsUrl']=Yii::app()->assetManager->publish(dirname(__FILE__) . '/vendor/Chart.js');
         $this->aRenderData['jqplotUrl']=Yii::app()->assetManager->publish(dirname(__FILE__) . '/vendor/jquery.jqplot');

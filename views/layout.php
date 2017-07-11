@@ -44,42 +44,25 @@
     ?>
   </head>
  <body>
-
-    <div class="navbar navbar-top">
-      <div class="navbar-inner">
+    <nav class="navbar navbar-default navbar-top">
         <div class="container">
-          <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-          <div class="brand" href="#"><?php echo CHtml::link(
-                CHtml::image("{$assetUrl}/logo.png").
-                CHtml::tag("div",array("class"=>'sr-only'),Yii::app()->getConfig("sitename")),
-                array("plugins/direct","plugin"=>"adminStats","function"=>"list")
-            ); ?>
-          </div>
-          <div class="nav-collapse collapse">
-            <ul class="nav pull-right">
+           <div class="navbar-header">
+              <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+                <?php echo CHtml::link(
+                    CHtml::tag("span",array("class"=>''),Yii::app()->getConfig("sitename")),
+                    array("plugins/direct","plugin"=>"adminStats","function"=>"list"),
+                    array("class"=>'navbar-brand')
+                ); ?>
+            </div>
+            <div id="navbar" class="navbar-collapse collapse">
+              <ul class="nav navbar-nav navbar-right">
+                <li><a href="http://extensions.sondages.pro/">About</a><li>
                 <?php
-
-                if(!empty($surveyList))
-                {
-                    echo CHtml::tag('li',array(),
-                        CHtml::link(gt("Surveys"),array('plugins/direct',"plugin"=>"adminStats","function"=>"list"))
-                    );
-                    //~ echo CHtml::tag('li',array('class'=>"dropdown"),"",false);
-                    //~ echo CHtml::tag('a',array('class'=>"dropdown-toggle",'aria-expanded'=>'false','aria-haspopup'=>'true','role'=>'button','data-toggle'=>'dropdown'),gT("Surveys").' <b class="caret"></b>');
-                    //~ echo CHtml::tag('ul',array('class'=>"dropdown-menu"),"",false);
-                    //~ foreach($surveyList as $survey)
-                    //~ {
-                        //~ echo CHtml::tag('li',array(),
-                            //~ CHtml::link($survey["surveyls_title"],array("plugins/direct","plugin"=>"adminStats","function"=>"stat","sid"=>$survey["sid"]))
-                        //~ );
-                    //~ }
-                    //~ echo CHtml::closeTag('ul');
-                    //~ echo CHtml::closeTag('li');
-                }
                 echo CHtml::tag('li',array('class'=>"dropdown"),"",false);
                 echo CHtml::tag('a',array('class'=>"dropdown-toggle",'aria-expanded'=>'false','aria-haspopup'=>'true','role'=>'button','data-toggle'=>'dropdown'),Yii::app()->user->getName().' <b class="caret"></b>');
                 echo CHtml::tag('ul',array('class'=>"dropdown-menu"),"",false);
@@ -94,12 +77,9 @@
                 echo CHtml::closeTag('ul');
                 echo CHtml::closeTag('li');
                 ?>
-            </ul>
-          </div><!--/.nav-collapse -->
+            </div><!--/.nav-collapse -->
         </div>
-      </div>
-    </div>
-
+    </nav>
     <div class="container">
       <?php
         Yii::app()->getController()->renderPartial("adminStats.views.{$subview}",$_data_);
