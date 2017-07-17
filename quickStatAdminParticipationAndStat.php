@@ -457,12 +457,10 @@ class quickStatAdminParticipationAndStat extends \ls\pluginmanager\PluginBase
         }
         elseif($this->iSurveyId)
         {
-            if(!Permission::model()->hasSurveyPermission($this->iSurveyId,'statistics'))
-            {
+            if(!Permission::model()->hasSurveyPermission($this->iSurveyId,'statistics')) {
                 throw new CHttpException(401,gT("You do not have sufficient rights to access this page."));
             }
-            if(tableExists("{{survey_{$oSurvey->sid}}}"))
-            {
+            if(tableExists("{{survey_{$oSurvey->sid}}}")) {
                 $oSurvey=Survey::model()->with('languagesettings')->find("sid=:sid",array(":sid"=>$this->iSurveyId));
                 if(in_array(App()->language,$oSurvey->getAllLanguages())){
                     $this->surveyLanguage=App()->language;
@@ -475,9 +473,7 @@ class quickStatAdminParticipationAndStat extends \ls\pluginmanager\PluginBase
                 }
                 $this->aRenderData['oSurvey']=$oSurvey;
                 $sAction=in_array($sAction,array('participation','satisfaction','export')) ? $sAction : 'participation';
-            }
-            else
-            {
+            } else {
                 $sAction="list";
             }
         }
@@ -751,7 +747,7 @@ class quickStatAdminParticipationAndStat extends \ls\pluginmanager\PluginBase
                             'max'=>max($maxByQuestion,$this->getMax($sColumnName)),
                             'datas'=>array(
                                 array(
-                                    'title'=>$this->translate->gT("Total Population"),
+                                    'title'=>$this->_translate("Total Population"),
                                     'count'=>$iCount,
                                     'average'=>$this->getAverage($sColumnName),
                                 ),
@@ -913,6 +909,9 @@ class quickStatAdminParticipationAndStat extends \ls\pluginmanager\PluginBase
         $this->render('satisfaction');
     }
 
+    /**
+     * Export in CSV the fayly response rate
+     */
     public function actionExportData()
     {
         if(empty($this->aRenderData['oSurvey']))
@@ -991,14 +990,17 @@ class quickStatAdminParticipationAndStat extends \ls\pluginmanager\PluginBase
         $this->render('list_surveys');
     }
 
+    /**
+     * Test if have only statistics access
+     * @todo : use a global settings ?
+     * @return boolean
+     */
     private function onlyStatAccess()
     {
-        if(Yii::app() instanceof CConsoleApplication)
-        {
+        if(Yii::app() instanceof CConsoleApplication) {
             return;
         }
-        if(!Yii::app()->session['loginID'])
-        {
+        if(!Yii::app()->session['loginID']) {
             return;
         }
         //~ $oCriteria=new CdbCriteria();
@@ -1011,6 +1013,8 @@ class quickStatAdminParticipationAndStat extends \ls\pluginmanager\PluginBase
     }
     /**
      * rendering a file in plugin view
+     * @param $fileRender the file to render (in views/subviews)
+     * @return void
      */
     private function render($fileRender)
     {
