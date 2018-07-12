@@ -1009,7 +1009,12 @@ class quickStatAdminParticipationAndStat extends PluginBase
             "uid=:uid AND permission NOT LIKE :permission AND entity='global' AND (create_p > 0 or read_p > 0 or update_p > 0 or delete_p > 0 or import_p > 0 or import_p > 0)",
             array(":uid"=>Yii::app()->session['loginID'],':permission' => "auth%")
         );
-        return !(bool)$countPermission;
+        $countSurveyPermission=Permission::model()->count(
+            "uid=:uid AND permission NOT LIKE :permission AND entity='Survey' AND (create_p > 0 or read_p > 0 or update_p > 0 or delete_p > 0 or import_p > 0 or import_p > 0)",
+            array(":uid"=>Yii::app()->session['loginID'],':permission' => "statistics")
+        );
+        return !((bool)$countPermission || (bool)$countSurveyPermission);
+
     }
     /**
      * rendering a file in plugin view

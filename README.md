@@ -21,8 +21,8 @@ Global settings offer what survey admin can choose for particpation.
 
 In Survey settings you can choose the question to show for participation and question for satisfaction.
 
-- Particpation question are single choice questions or token attribute (if exist)
-- Satisfaction question can be single choice, numeric or array question type. The mean is calculated with numerical code of answers only, tyhis allow to use Not Applicable option for example.
+- Participation question are single choice questions or token attribute (if exist). 
+- Satisfaction question can be single choice, numeric or array question type. The mean is calculated with numerical code of answers only, this allow to use Not Applicable code NA for example.
 
 If the an user don't have global permission except login : it was redirected to a survey list. Only survey with statictics Permission are shown.
 
