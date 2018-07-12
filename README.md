@@ -8,7 +8,7 @@ See [Install and activate a plugin for LimeSurvey](https://extensions.sondages.p
 
 ### Via GIT
 - Go to your LimeSurvey Directory
-- Clone in plugins/adminStats directory : `git clone https://framagit.org/SondagePro-LimeSurvey-plugin/quickStatAdminParticipationAndStat.git quickStatAdminParticipationAndStat`
+- Clone in plugins/adminStats directory : `git clone https://gitlab.com/SondagesPro/ExportAndStats/quickStatAdminParticipationAndStat.git quickStatAdminParticipationAndStat`
 
 ### Via ZIP dowload
 - Download <http://extensions.sondages.pro/IMG/auto/quickStatAdminParticipationAndStat.zip>
@@ -26,8 +26,14 @@ In Survey settings you can choose the question to show for participation and que
 
 If the an user don't have global permission except login : it was redirected to a survey list. Only survey with statictics Permission are shown.
 
+## Contribution and issue
+
+All contributionn are welcome. It's better to use [gitlab](https://gitlab.com/SondagesPro/ExportAndStats/quickStatAdminParticipationAndStat) for all contributions and feedback. Github should only be used excetionally.
+
+No support is done on issues, for professional support, please use our [contact form](https://extensions.sondages.pro/contact) or our [support website](https://support.sondages.pro/).
+
 ## Home page & Copyright
-- HomePage <https://extensions.sondages.pro/export-statistics-and-database/quick-statistics-panel-participation-and-satisfaction/>
+- HomePage [extensions.sondages.pro](https://extensions.sondages.pro/export-statistics-and-database/quick-statistics-panel-participation-and-satisfaction/)
 - Copyright © 2016-2018 Denis Chenu <http://sondages.pro>
 - Copyright © 2016 Advantage <http://www.advantage.fr>
 - Licence : GNU Affero General Public License <https://www.gnu.org/licenses/agpl-3.0.html>
