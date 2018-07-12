@@ -1,13 +1,13 @@
 <?php
 /**
- * The plugin event redirect system
+ * Shown quick stat to allowed admin user
  *
  * @author Denis Chenu <denis@sondages.pro>
- * @copyright 2016-2017 Denis Chenu <https://www.sondages.pro>
+ * @copyright 2016-2018 Denis Chenu <https://www.sondages.pro>
  * @copyright 2016 Advantage <http://www.advantage.fr>
 
  * @license AGPL v3
- * @version 2.0.0
+ * @version 3.0.0
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -17,9 +17,9 @@
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Affero General Public License for more details.
  */
-class quickStatAdminParticipationAndStat extends \ls\pluginmanager\PluginBase
+class quickStatAdminParticipationAndStat extends PluginBase
 {
     protected $storage = 'DbStorage';
 

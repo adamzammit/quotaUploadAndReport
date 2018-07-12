@@ -27,7 +27,7 @@ In Survey settings you can choose the question to show for participation and que
 If the an user don't have global permission except login : it was redirected to a survey list. Only survey with statictics Permission are shown.
 
 ## Home page & Copyright
-- HomePage <http://extensions.sondages.pro/>
-- Copyright © 2016-2017 Denis Chenu <http://sondages.pro>
+- HomePage <https://extensions.sondages.pro/export-statistics-and-database/quick-statistics-panel-participation-and-satisfaction/>
+- Copyright © 2016-2018 Denis Chenu <http://sondages.pro>
 - Copyright © 2016 Advantage <http://www.advantage.fr>
 - Licence : GNU Affero General Public License <https://www.gnu.org/licenses/agpl-3.0.html>
