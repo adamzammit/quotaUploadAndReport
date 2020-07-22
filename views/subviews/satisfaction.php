@@ -1,4 +1,4 @@
-<h1><?php echo $titre; ?></h1>
+<h1 class="text-primary"><?php echo $titre; ?></h1>
 <ul class="nav nav-tabs">
   <li role="presentation"><?php echo CHtml::link(\Yii::t('',"Participation",array(),$className),array("plugins/direct","plugin"=>$className,"function"=>"participation","sid"=>$oSurvey->sid)); ?></li>
   <?php if($showSatisfaction) { ?>
@@ -35,7 +35,7 @@
 
 <?php foreach($aReorederSatisfactions as $iSatId=>$aSatisfaction){ ?>
 
-  <h2><?php echo $aSatisfaction['title'] ?></h2>
+  <h2 class="text-primary"><?php echo $aSatisfaction['title'] ?></h2>
   <?php foreach($aSatisfaction['aResponses'] as $repKey=>$aResponse){ ?>
     <?php
       switch($aResponse['type']){
