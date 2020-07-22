@@ -1050,7 +1050,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
         $this->aRenderData['content'] = App()->controller->renderPartial("quickStatAdminParticipationAndStat.views.content",$this->aRenderData,1);
         $this->subscribe('getPluginTwigPath','getPluginTwigPathRender');
         if( empty($this->iSurveyId)) {
-            $this->renderNoSurvey($content);
+            $this->renderNoSurvey();
         }
         
         $twigRenderData = array(
@@ -1079,9 +1079,34 @@ class quickStatAdminParticipationAndStat extends PluginBase
         Yii::app()->end();
     }
 
-    private function renderNoSurvey($content) {
+    private function renderNoSurvey() {
         $lang = Yii::app()->language;
-        die();
+        $aLanguages = getLanguageDataRestricted( false,'short' );
+        if ( !isset($aLanguages[$lang]) ) {
+            $lang = App()->getConfig( 'defaultlang' );
+            Yii::app()->language = $lang;
+        }
+        $oTemplate       = Template::model()->getInstance(getGlobalSetting('defaulttheme'));
+        $twigRenderData = array(
+            'aStatPanel' => $this->aRenderData
+        );
+        $twigRenderData['aSurveyInfo'] = array(
+            'oTemplate'         => $oTemplate,
+            'sSiteName'         => Yii::app()->getConfig('sitename'),
+            'sSiteAdminName'    => Yii::app()->getConfig("siteadminname"),
+            'sSiteAdminEmail'   => Yii::app()->getConfig("siteadminemail"),
+            'bShowClearAll'     => false,
+            'surveyls_title'    => Yii::app()->getConfig('sitename')
+        );
+        $twigRenderData['aSurveyInfo']['include_content'] = 'quickstatpanel';
+        $twigRenderData['aSurveyInfo']['showprogress'] = false;
+        $twigRenderData['aSurveyInfo']['active'] = true;
+        $twigRenderData['aStatPanel']['userName'] = Yii::app()->user->getName();
+        $twigRenderData['aStatPanel']['surveyUrl'] = App()->createUrl('plugins/direct', array('plugin' => $this->getName(), 'function' => 'stat'));
+
+        Yii::app()->clientScript->registerScriptFile(Yii::app()->getConfig("generalscripts").'nojs.js', CClientScript::POS_HEAD);
+        Yii::app()->twigRenderer->renderTemplateFromFile("layout_global.twig", $twigRenderData, false);
+        Yii::app()->end();
     }
     public function getPluginTwigPath()
     {
