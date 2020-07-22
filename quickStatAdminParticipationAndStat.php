@@ -1016,6 +1016,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
         return !((bool)$countPermission || (bool)$countSurveyPermission);
 
     }
+
     /**
      * rendering a file in plugin view
      * @param $fileRender the file to render (in views/subviews)
@@ -1024,6 +1025,77 @@ class quickStatAdminParticipationAndStat extends PluginBase
     private function render($fileRender)
     {
         Yii::setPathOfAlias('quickStatAdminParticipationAndStat', dirname(__FILE__));
+
+        if (version_compare(App()->getConfig("versionnumber"),"3.10.0","<=")) {
+            return $this->renderPre3($fileRender);
+
+        }
+        $oEvent=$this->event;
+        $this->aRenderData['assetUrl']=$sAssetUrl=Yii::app()->assetManager->publish(dirname(__FILE__) . '/assets');
+        $this->aRenderData['jqplotUrl']=Yii::app()->assetManager->publish(dirname(__FILE__) . '/vendor/jquery.jqplot');
+        $this->aRenderData['subview']="subviews.{$fileRender}";
+        $this->aRenderData['surveyList']=$this->getSurveyList();
+        $this->aRenderData['showSatisfaction']=count($this->get("questionNumeric","Survey",$this->iSurveyId,array()));
+        $this->aRenderData['showAdminSurvey']=Permission::model()->hasSurveyPermission($this->iSurveyId,'surveysettings','update') && !$this->onlyStatAccess();
+        $this->aRenderData['showAdmin']=!$this->onlyStatAccess();
+        $this->aRenderData['className']=self::$name;
+        $this->aRenderData['content'] = App()->controller->renderPartial("quickStatAdminParticipationAndStat.views.content",$this->aRenderData,1);
+        $this->subscribe('getPluginTwigPath');
+        if( empty($this->iSurveyId)) {
+            $this->renderNoSurvey($content);
+        }
+        
+        $twigRenderData = array(
+            'aStatPanel' => $this->aRenderData
+        );
+        $oSurvey=Survey::model()->findByPK($this->iSurveyId);
+        $language = App()->getLanguage();
+        if(!in_array($language, $oSurvey->getAllLanguages())) {
+            $language = $oSurvey->language;
+        }
+        $twigRenderData['aSurveyInfo'] = getSurveyInfo($this->iSurveyId,$language);
+        $twigRenderData['aSurveyInfo']['include_content'] = 'quickstatpanel';
+        $twigRenderData['aSurveyInfo']['showprogress'] = false;
+        $twigRenderData['aStatPanel']['userName'] = Yii::app()->user->getName();
+        App()->clientScript->registerScriptFile(Yii::app()->getConfig("generalscripts").'nojs.js', CClientScript::POS_HEAD);
+        Template::model()->getInstance(null, $this->iSurveyId);
+        Yii::app()->twigRenderer->renderTemplateFromFile('layout_global.twig', $twigRenderData, false);
+        Yii::app()->end();
+    }
+
+    private function renderNoSurvey($content) {
+        $lang = Yii::app()->language;
+        die();
+    }
+    public function getPluginTwigPath()
+    {
+        $viewPath = dirname(__FILE__)."/twig";
+        $forcedPath = dirname(__FILE__)."/twig_replace";
+        $this->getEvent()->append('add', array($viewPath));
+        $this->getEvent()->append('replace', array($forcedPath));
+    }
+
+    public function getValidScreenFiles()
+    {
+        if(
+            $this->getEvent()->get("type")!='view' ||
+            ($this->getEvent()->get("screen"))
+        ){
+            return;
+        }
+        $this->getEvent()->append('add', array(
+            "subviews/quickstatpanel/about.twig",
+            "subviews/quickstatpanel/usermenu.twig"
+        ));
+    }
+
+    /**
+     * rendering a file in plugin view
+     * @param $fileRender the file to render (in views/subviews)
+     * @return void
+     */
+    private function renderPre3($fileRender)
+    {
         Yii::app()->clientScript->addPackage( 'boostrap-quickStatAdminParticipationAndStat', array(
             'basePath'    => 'quickStatAdminParticipationAndStat.vendor.bootstrap',
             'css'         => array('css/bootstrap.min.css'),
