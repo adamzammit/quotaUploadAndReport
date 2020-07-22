@@ -1,4 +1,4 @@
-<h1><?php echo gT('Surveys') ?></h1>
+<h1 class=" quickstatpanel-title"><?php echo gT('Surveys') ?></h1>
 
 <?php
     //echo CHtml::tag('pre',array(),print_r($aSurveys,1));

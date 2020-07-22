@@ -1,4 +1,4 @@
-    <h3 class="text-info"><?php echo $aResponse['title'] ?></h3>
+    <h3 class="text-info quickstatpanel-title"><?php echo $aResponse['title'] ?></h3>
     <?php
       echo CHtml::tag("div",array("id"=>"chart-r{$repKey}-s{$iSatId}",'class'=>'graph'),"",true);
     ?>

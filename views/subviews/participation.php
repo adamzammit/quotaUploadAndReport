@@ -1,4 +1,4 @@
-<h1 class="text-info"><?php echo $titre; ?></h1>
+<h1 class="text-info quickstatpanel-title"><?php echo $titre; ?></h1>
 <ul class="nav nav-tabs">
   <li role="presentation" class="active"><a href="#"><?php echo \Yii::t('',"Participation",array(),$className) ?></a></li>
   <?php if($showSatisfaction) { ?>
@@ -55,7 +55,7 @@
         'className'=>$className,
     ));
 }?>
-    <h2 class="text-info"><?php echo \Yii::t('',"Participation rate",array(),$className); ?></h2>
+    <h2 class="text-info quickstatpanel-title"><?php echo \Yii::t('',"Participation rate",array(),$className); ?></h2>
 <?php foreach($aResponses as $aResponse){ ?>
     <table class="table table-bordered <?php echo ($aResponse['max']>0) ? "" :" nopercentage"; ?>">
         <thead>

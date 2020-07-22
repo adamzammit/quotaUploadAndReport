@@ -1,5 +1,5 @@
     <?php
-    echo CHtml::tag("h2",array("class"=>'text-info'),$title);
+    echo CHtml::tag("h2",array("class"=>'text-info quickstatpanel-title'),$title);
     if(!empty($showSum))
     {
       echo CHtml::tag("h4",array("class"=>''),sprintf(\Yii::t('',"Total responses: %s",array(),$className),array_sum($aResponses)));
