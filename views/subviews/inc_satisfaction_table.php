@@ -1,4 +1,4 @@
-    <h3 class="text-primary"><?php echo $aResponse['title'] ?></h3>
+    <h3 class="text-info"><?php echo $aResponse['title'] ?></h3>
      <table class="table table-bordered table-striped">
         <thead>
             <tr class="bg-primary">

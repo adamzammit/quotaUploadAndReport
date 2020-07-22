@@ -3,11 +3,11 @@
  * Shown quick stat to allowed admin user
  *
  * @author Denis Chenu <denis@sondages.pro>
- * @copyright 2016-2018 Denis Chenu <https://www.sondages.pro>
+ * @copyright 2016-2020 Denis Chenu <https://www.sondages.pro>
  * @copyright 2016 Advantage <http://www.advantage.fr>
 
  * @license AGPL v3
- * @version 3.0.0
+ * @version 4.0.0
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -83,6 +83,8 @@ class quickStatAdminParticipationAndStat extends PluginBase
 
         /* register language */
         $this->subscribe('afterPluginLoad');
+
+        $this->subscribe('getValidScreenFiles');
 
     }
 
@@ -1040,7 +1042,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
         $this->aRenderData['showAdmin']=!$this->onlyStatAccess();
         $this->aRenderData['className']=self::$name;
         $this->aRenderData['content'] = App()->controller->renderPartial("quickStatAdminParticipationAndStat.views.content",$this->aRenderData,1);
-        $this->subscribe('getPluginTwigPath');
+        $this->subscribe('getPluginTwigPath','getPluginTwigPathRender');
         if( empty($this->iSurveyId)) {
             $this->renderNoSurvey($content);
         }
@@ -1070,22 +1072,28 @@ class quickStatAdminParticipationAndStat extends PluginBase
     public function getPluginTwigPath()
     {
         $viewPath = dirname(__FILE__)."/twig";
-        $forcedPath = dirname(__FILE__)."/twig_replace";
         $this->getEvent()->append('add', array($viewPath));
-        $this->getEvent()->append('replace', array($forcedPath));
     }
 
+    public function getPluginTwigPathRender()
+    {
+        $this->getPluginTwigPath();
+        $forcedPath = dirname(__FILE__)."/twig_replace";
+        $this->getEvent()->append('replace', array($forcedPath));
+    }
     public function getValidScreenFiles()
     {
+        $this->subscribe('getPluginTwigPath');
         if(
             $this->getEvent()->get("type")!='view' ||
-            ($this->getEvent()->get("screen"))
+            ($this->getEvent()->get("screen") && $this->getEvent()->get("screen")!="welcome")
         ){
             return;
         }
-        $this->getEvent()->append('add', array(
-            "subviews/quickstatpanel/about.twig",
-            "subviews/quickstatpanel/usermenu.twig"
+        $this->getEvent()->append("add", array(
+            "subviews/quickstatpanel/statpanel_about.twig",
+            "subviews/quickstatpanel/statpanel_usermenu.twig",
+            "subviews/quickstatpanel/statpanel_param.twig"
         ));
     }
 

@@ -1,4 +1,4 @@
-    <h3 class="text-primary"><?php echo $aResponse['title'] ?></h3>
+    <h3 class="text-info"><?php echo $aResponse['title'] ?></h3>
     <?php
       echo CHtml::tag("div",array("id"=>"chart-r{$repKey}-s{$iSatId}",'class'=>'graph'),"",true);
     ?>
@@ -19,18 +19,18 @@
 
         <?php echo "plotr{$repKey}s{$iSatId}" ?> = $.jqplot('<?php echo "chart-r{$repKey}-s{$iSatId}"; ?>', [s1], {
             animate: false,
-            seriesColors:['#0092dd'],
+            seriesColors:[quickstatpanel.seriecolor],
             seriesDefaults:{
                 renderer:$.jqplot.BarRenderer,
                 pointLabels: {
                   show: true,
                   location: 's',
                   formatString: "%#.2f",
-                  color:'#ffffff'
+                  color : quickstatpanel.labelcolor
                 }
             },
             grid:{
-              background : '#ffffff'
+              background : quickstatpanel.gridcolor
             },
             axes: {
                 xaxis: {
@@ -38,7 +38,7 @@
                     ticks: ticks,
                     tickOptions: {
                         angle: <?php echo $angle; ?>,
-                        textColor: '#000'
+                        textColor: quickstatpanel.ticktexcolor
                     },
                     labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
                     tickRenderer: $.jqplot.CanvasAxisTickRenderer

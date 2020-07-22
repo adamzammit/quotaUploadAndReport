@@ -1,5 +1,5 @@
     <?php
-    echo CHtml::tag("h2",array("class"=>'text-primary'),$title);
+    echo CHtml::tag("h2",array("class"=>'text-info'),$title);
     if(!empty($showSum))
     {
       echo CHtml::tag("h4",array("class"=>''),sprintf(\Yii::t('',"Total responses: %s",array(),$className),array_sum($aResponses)));
@@ -39,13 +39,13 @@
                 }
             },
               series:[{showMarker:true}],
-               seriesColors:['#0092dd'],
+               seriesColors:[quickstatpanel.seriecolor],
                highlighter: {
                 show: true,
                 sizeAdjust: 1,
             },
             grid:{
-              background : '#ffffff'
+              background : quickstatpanel.gridcolor
             },
             rendererOptions: {
                       smooth: true

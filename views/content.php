@@ -30,6 +30,7 @@ App()->clientScript->registerScriptFile($jqplotUrl . '/plugins/jqplot.categoryAx
 App()->clientScript->registerScriptFile($jqplotUrl . '/plugins/jqplot.canvasAxisLabelRenderer.js');
 App()->clientScript->registerScriptFile($jqplotUrl . '/plugins/jqplot.canvasAxisTickRenderer.js');
 App()->clientScript->registerScriptFile($jqplotUrl . '/plugins/jqplot.pointLabels.js');
-
+?>
+<?php
 Yii::app()->getController()->renderPartial("{$className}.views.{$subview}",$_data_);
 ?>
