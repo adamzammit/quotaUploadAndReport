@@ -1,2 +1,9 @@
 {% include './subviews/quickstatpanel/statpanel_param.twig' %}
 {{ aStatPanel.content|raw }}
+
+{# for languagechanger (and other potential function ?#}
+
+<div class="hidden" aria-hidden="true">
+    {{ C.Html.form(aStatPanel.surveyUrl,'get',({'id' : 'limesurvey', 'role' : 'form', 'class' : 'hidden'})) }}
+    </form>
+</div>

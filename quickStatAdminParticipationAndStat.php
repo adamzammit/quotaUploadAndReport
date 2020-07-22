@@ -96,7 +96,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
 
         $aSettings=array();
 
-        $url=$this->api->createUrl('plugins/direct', array('plugin' => $this->getName(), 'function' => 'stat',"sid"=>$oEvent->get('survey')));
+        $url = App()->createUrl('plugins/direct', array('plugin' => $this->getName(), 'function' => 'stat',"sid"=>$oEvent->get('survey')));
         if(tableExists("{{survey_{$oSurvey->sid}}}"))
         {
             $aSettings["statlink"]=array(
@@ -452,7 +452,13 @@ class quickStatAdminParticipationAndStat extends PluginBase
         $sAction=$this->event->get('function');
 
         $this->iSurveyId=$this->api->getRequest()->getParam('sid');
-        $oSurvey=Survey::model()->findByPK($this->iSurveyId);
+        $oSurvey = Survey::model()->findByPK($this->iSurveyId);
+        if(App()->getRequest()->getParam('lang')) {
+            App()->language = App()->getRequest()->getParam('lang');
+            Yii::app()->session['statlanguage'] = App()->language;
+        } elseif(Yii::app()->session['statlanguage']) {
+            App()->language = Yii::app()->session['statlanguage'];
+        }
         if($this->iSurveyId && !$oSurvey)
         {
             throw new CHttpException(404, gT("The survey does not seem to exist."));
@@ -1058,7 +1064,15 @@ class quickStatAdminParticipationAndStat extends PluginBase
         $twigRenderData['aSurveyInfo'] = getSurveyInfo($this->iSurveyId,$language);
         $twigRenderData['aSurveyInfo']['include_content'] = 'quickstatpanel';
         $twigRenderData['aSurveyInfo']['showprogress'] = false;
+        Yii::app()->setConfig('surveyID',$this->iSurveyId);
+        $twigRenderData['aSurveyInfo']['alanguageChanger']['show'] = false;
+        $alanguageChangerDatas = getLanguageChangerDatas(App()->language);
+        if ($alanguageChangerDatas) {
+            $twigRenderData['aSurveyInfo']['alanguageChanger']['show']  = true;
+            $twigRenderData['aSurveyInfo']['alanguageChanger']['datas'] = $alanguageChangerDatas;
+        }
         $twigRenderData['aStatPanel']['userName'] = Yii::app()->user->getName();
+        $twigRenderData['aStatPanel']['surveyUrl'] = App()->createUrl('plugins/direct', array('plugin' => $this->getName(), 'function' => 'stat',"sid"=>$this->iSurveyId));
         App()->clientScript->registerScriptFile(Yii::app()->getConfig("generalscripts").'nojs.js', CClientScript::POS_HEAD);
         Template::model()->getInstance(null, $this->iSurveyId);
         Yii::app()->twigRenderer->renderTemplateFromFile('layout_global.twig', $twigRenderData, false);
