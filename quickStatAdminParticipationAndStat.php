@@ -7,7 +7,7 @@
  * @copyright 2016 Advantage <http://www.advantage.fr>
 
  * @license AGPL v3
- * @version 4.1.0
+ * @version 4.1.1
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -594,7 +594,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
                         $aData[]=array(
                             'title'=>viewHelper::flatEllipsizeText($sTokenValue,true,false),
                             'max'=>$max,
-                            'completed'=>Token::model($iSurveyId)->count("$tokenCross=:tokenvalue AND completed!='N' AND completed<>''",array(":tokenvalue"=>$sTokenValue)),
+                            'completed'=>Token::model($iSurveyId)->with('responses')->count("$tokenCross=:tokenvalue AND completed!='N' AND completed<>'' AND responses.submitdate IS NOT NULL",array(":tokenvalue"=>$sTokenValue)),
                         );
                     }
                     $aResponses[$tokenCross]=array(
