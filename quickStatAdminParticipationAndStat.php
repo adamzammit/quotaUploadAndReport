@@ -7,7 +7,7 @@
  * @copyright 2016 Advantage <http://www.advantage.fr>
 
  * @license AGPL v3
- * @version 4.1.1
+ * @version 4.1.2
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -90,6 +90,9 @@ class quickStatAdminParticipationAndStat extends PluginBase
 
     public function beforeSurveySettings()
     {
+        if (!$this->getEvent()) {
+            throw new CHttpException(403);
+        }
         $oEvent = $this->event;
         $aSettings=array();
         $oSurvey=Survey::model()->findByPk($oEvent->get('survey'));
@@ -405,8 +408,12 @@ class quickStatAdminParticipationAndStat extends PluginBase
             'settings' => $aSettings,
         ));
     }
+
     public function newSurveySettings()
     {
+        if (!$this->getEvent()) {
+            throw new CHttpException(403);
+        }
         $event = $this->event;
         $aSettings=$event->get('settings');
         /* Fix not set dropdown */
@@ -424,11 +431,15 @@ class quickStatAdminParticipationAndStat extends PluginBase
             $this->set($name, $value, 'Survey', $event->get('survey'),$default);
         }
     }
+
     /**
      * Always redirect user to stat if don't have Global survey access
      */
     public function beforeControllerAction()
     {
+        if (!$this->getEvent()) {
+            throw new CHttpException(403);
+        }
         if($this->onlyStatAccess() && ($this->event->get('controller')=='admin' && $this->event->get('action')!='authentication'))
         {
             Yii::app()->controller->redirect(array('plugins/direct','plugin' => $this->getName(), 'function' => 'list'));
@@ -440,6 +451,9 @@ class quickStatAdminParticipationAndStat extends PluginBase
      */
     public function newDirectRequest()
     {
+        if (!$this->getEvent()) {
+            throw new CHttpException(403);
+        }
         Yii::import('application.helpers.viewHelper');
 
         if ($this->event->get('target') != get_class()) {
@@ -515,8 +529,9 @@ class quickStatAdminParticipationAndStat extends PluginBase
      */
     public function actionParticipation()
     {
-        if(empty($this->aRenderData['oSurvey']))
+        if(empty($this->aRenderData['oSurvey'])) {
             throw new CHttpException(500);
+        }
         $oSurvey=$this->aRenderData['oSurvey'];
         if($oSurvey->datestamp=="Y")
         {
@@ -651,14 +666,16 @@ class quickStatAdminParticipationAndStat extends PluginBase
         }
         return $aResponses;
     }
+
     /**
      * Show Satisfaction for this survey
      * @return void (rendering)
      */
     public function actionSatisfaction()
     {
-        if(empty($this->aRenderData['oSurvey']))
+        if(empty($this->aRenderData['oSurvey'])) {
             throw new CHttpException(500);
+        }
         $oSurvey=$this->aRenderData['oSurvey'];
         $aResponses=array();
         /* Global */
@@ -922,8 +939,9 @@ class quickStatAdminParticipationAndStat extends PluginBase
      */
     public function actionExportData()
     {
-        if(empty($this->aRenderData['oSurvey']))
+        if(empty($this->aRenderData['oSurvey'])) {
             throw new CHttpException(500);
+        }
         $oSurvey=$this->aRenderData['oSurvey'];
         $exportType="dayresponse";
         $type=App()->getRequest()->getParam('state');
@@ -948,13 +966,14 @@ class quickStatAdminParticipationAndStat extends PluginBase
         }
         die();
     }
+
     /**
      * Get the reponse by day
      * @param int iSurveyId : the id of the survey
      * @param string state : date to take into account
      * @return array (response by day)
      */
-    public function getDailyResponsesRate($iSurveyId,$state='submitdate')
+    private function getDailyResponsesRate($iSurveyId,$state='submitdate')
     {
 
         $aDailyResponsesRateArray=Yii::app()->db->createCommand()
@@ -971,13 +990,14 @@ class quickStatAdminParticipationAndStat extends PluginBase
         }
         return $aDailyResponsesRate;
     }
+
     /**
      * Get list of statictics survey for this user
      * @return void (rendering)
      */
     public function actionList()
     {
-        $this->aRenderData['titre']=gt("Surveys");
+        $this->aRenderData['titre'] =gt("Surveys");
         $aStatSurveys=$this->getSurveyList();
         $aFinalSurveys=array();
         foreach($aStatSurveys as $aStatSurvey)
@@ -1108,20 +1128,30 @@ class quickStatAdminParticipationAndStat extends PluginBase
         Yii::app()->twigRenderer->renderTemplateFromFile("layout_global.twig", $twigRenderData, false);
         Yii::app()->end();
     }
+
     public function getPluginTwigPath()
     {
+        if (!$this->getEvent()) {
+            throw new CHttpException(403);
+        }
         $viewPath = dirname(__FILE__)."/twig";
         $this->getEvent()->append('add', array($viewPath));
     }
 
     public function getPluginTwigPathRender()
     {
+        if (!$this->getEvent()) {
+            throw new CHttpException(403);
+        }
         $this->getPluginTwigPath();
         $forcedPath = dirname(__FILE__)."/twig_replace";
         $this->getEvent()->append('replace', array($forcedPath));
     }
     public function getValidScreenFiles()
     {
+        if (!$this->getEvent()) {
+            throw new CHttpException(403);
+        }
         $this->subscribe('getPluginTwigPath');
         if(
             $this->getEvent()->get("type")!='view' ||
@@ -1168,9 +1198,13 @@ class quickStatAdminParticipationAndStat extends PluginBase
      */
     private function getSurveyList()
     {
+        if (!Yii::app()->user->getId()) {
+            throw new CHttpException(401);
+        }
         static $aStatSurveys;
-        if(null!==$aStatSurveys)
+        if(null!==$aStatSurveys) {
             return $aStatSurveys;
+        }
 
         $oCriteria=new CdbCriteria();
         $oCriteria->condition='active=:active';
