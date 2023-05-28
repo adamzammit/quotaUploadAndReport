@@ -5,7 +5,7 @@
   <li role="presentation" class="active"><a href="#"><?php echo \Yii::t('',"Satisfaction",array(),$className); ?></a></li>
   <?php } ?>
   <?php if($showAdminSurvey) { ?>
-  <li role="presentation"><?php echo CHtml::link(\Yii::t('',"Administration",array(),$className),array("admin/survey","sa"=>"view","surveyid"=>$oSurvey->sid)); ?></a></li>
+  <li role="presentation"><?php echo CHtml::link(\Yii::t('',"Administration",array(),$className),array("surveyAdministration/view","surveyid"=>$oSurvey->sid)); ?></a></li>
   <?php } ?>
 </ul>
 <?php

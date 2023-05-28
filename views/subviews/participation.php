@@ -5,7 +5,7 @@
   <li role="presentation"><?php echo CHtml::link(\Yii::t('',"Satisfaction",array(),$className),array("plugins/direct","plugin"=>"{$className}","function"=>"satisfaction","sid"=>$oSurvey->sid)) ?></li>
   <?php } ?>
   <?php if($showAdminSurvey) { ?>
-  <li role="presentation"><?php echo CHtml::link(gT("Administration"),array("admin/survey","sa"=>"view","surveyid"=>$oSurvey->sid)); ?></a></li>
+  <li role="presentation"><?php echo CHtml::link(gT("Administration"),array("surveyAdministration/view","surveyid"=>$oSurvey->sid)); ?></a></li>
   <?php } ?>
 </ul>
 <?php

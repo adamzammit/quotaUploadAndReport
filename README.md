@@ -6,6 +6,8 @@ A plugin for limesurvey to show some quick statistics about participation and sa
 
 See [Install and activate a plugin for LimeSurvey](https://extensions.sondages.pro/install-and-activate-a-plugin-for-limesurvey) for details.
 
+This version is for LimeSurvey 4 and up and was tested on LimeSurvey 5 only.
+
 ### Via GIT
 - Go to your LimeSurvey Directory
 - Clone in plugins/adminStats directory : `git clone https://gitlab.com/SondagesPro/ExportAndStats/quickStatAdminParticipationAndStat.git quickStatAdminParticipationAndStat`
@@ -28,12 +30,12 @@ If the an user don't have global permission except login : it was redirected to 
 
 ## Contribution and issue
 
-All contributionn are welcome. It's better to use [gitlab](https://gitlab.com/SondagesPro/ExportAndStats/quickStatAdminParticipationAndStat) for all contributions and feedback. Github should only be used excetionally.
+All contribution are welcome. It's better to use [gitlab](https://gitlab.com/SondagesPro/ExportAndStats/quickStatAdminParticipationAndStat) for all contributions and feedback. Github should only be used excetionally.
 
 No support is done on issues, for professional support, please use our [contact form](https://extensions.sondages.pro/contact) or our [support website](https://support.sondages.pro/).
 
 ## Home page & Copyright
 - HomePage [extensions.sondages.pro](https://extensions.sondages.pro/export-statistics-and-database/quick-statistics-panel-participation-and-satisfaction/)
-- Copyright © 2016-2018 Denis Chenu <http://sondages.pro>
-- Copyright © 2016 Advantage <http://www.advantage.fr>
+- Copyright © 2016-2023 Denis Chenu <http://sondages.pro>
+- Copyright © 2016-2023 Advantage <http://www.advantage.fr>
 - Licence : GNU Affero General Public License <https://www.gnu.org/licenses/agpl-3.0.html>
