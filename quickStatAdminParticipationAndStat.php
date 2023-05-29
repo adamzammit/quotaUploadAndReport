@@ -1365,7 +1365,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
                             ":language" => $this->surveyLanguage,
                         ],
                     ]);
-                    $aAnswers = Chtml::listData($oAnswers, "code", "answerl10ns.answer");
+                    $aAnswers = Chtml::listData($oAnswers, "code", "answerl10ns.{$this->surveyLanguage}.answer");
                     $aData = [];
                     foreach ($aDataInfos as $sColumnName => $aDataInfo) {
                         /* Start by population */
