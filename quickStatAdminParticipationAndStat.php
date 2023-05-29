@@ -825,7 +825,6 @@ class quickStatAdminParticipationAndStat extends PluginBase
         } else {
             $sAction = false;
         }
-        tracevar($sAction);
         switch ($sAction) {
             case "list":
                 $this->actionList();
