@@ -75,8 +75,6 @@ class quickStatAdminParticipationAndStat extends PluginBase
         $this->subscribe("newSurveySettings");
         /* Show page */
         $this->subscribe("newDirectRequest");
-        /* register language */
-        $this->subscribe("afterPluginLoad");
         /* Broken register
         $this->subscribe("getValidScreenFiles");
         */
@@ -2052,24 +2050,6 @@ class quickStatAdminParticipationAndStat extends PluginBase
      */
     private function translate($string)
     {
-        return Yii::t("", $string, [], self::$name);
-    }
-
-    /**
-     * Add this translation just after loaded all plugins
-     * @see event afterPluginLoad
-     */
-    public function afterPluginLoad()
-    {
-        $oLang = [
-            "class" => "CGettextMessageSource",
-            "cacheID" => self::$name . "Lang",
-            "cachingDuration" => 3600,
-            "forceTranslation" => true,
-            "useMoFile" => true,
-            "basePath" => __DIR__ . DIRECTORY_SEPARATOR . "locale",
-            "catalog" => "messages", // default from Yii
-        ];
-        Yii::app()->setComponent(self::$name, $oLang);
+        return $this->gT($string, 'unescaped');
     }
 }
