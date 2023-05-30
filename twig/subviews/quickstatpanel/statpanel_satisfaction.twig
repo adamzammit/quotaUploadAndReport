@@ -1,0 +1,62 @@
+{% set lang = aStatPanel.language %}
+
+<h1 class="text-primary quickstatpanel-title">{{ aStatPanel.titre }}</h1>
+<ul class="nav nav-tabs">
+    <li role="presentation">
+        <a href="{{ createUrl(
+            "plugins/direct",
+             ({
+                'plugin' : aStatPanel.className,
+                'function' : 'participation',
+                'sid' : aSurveyInfo.sid
+             })
+            ) }}"
+        >{{ lang["Participation"] }} </a>
+    </li>
+    <li role="presentation" class="active">
+        <a href="#">{{ lang["Satisfaction"] }} </a>
+    </li>
+  {% if aStatPanel.showAdminSurvey %}
+    <li role="presentation">
+        <a href="{{ createUrl(
+            "surveyAdministration/view",
+             ({
+                'plugin' : aStatPanel.className,
+                'function' : 'satisfaction',
+                'sid' : aSurveyInfo.sid
+             })
+            ) }}"
+        >{{ lang["Administration"] }} </a>
+    </li>
+  {% endif %}
+</ul>
+{% if aStatPanel.htmlComment %}
+    <div class="well clearfix">{{ aStatPanel.htmlComment }}</div>
+{% endif %}
+{% for iSatId, aSatisfaction in aStatPanel.aReorderSatisfactions %}
+<div class="panel panel-primary">
+  <div class="panel-heading quickstatpanel-title">
+    <h2 class="quickstat-panel-title">{{ aSatisfaction.title }}</h2>
+  </div>
+  <div class="panel-body">
+  {% for repKey, aResponse in aSatisfaction.aResponses %}
+      {% if aResponse.type == 'table' %}
+        {% include './subviews/quickstatpanel/statpanel_satisfaction_table.twig' with {
+            'repKey' : repKey,
+            'iSatId' : iSatId,
+            'aResponses' : aResponse,
+            'className' : aStatPanel.className
+        } %}
+      {% endif %}
+      {% if aResponse.type == 'graph' %}
+        {% include './subviews/quickstatpanel/statpanel_satisfaction_graph.twig' with {
+            'repKey' : repKey,
+            'iSatId' : iSatId,
+            'aResponses' : aResponse,
+            'className' : aStatPanel.className
+        } %}
+      {% endif %}
+  {% endfor %}
+  </div>
+</div>
+{% endfor %}

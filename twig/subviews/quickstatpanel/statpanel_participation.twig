@@ -1,0 +1,112 @@
+{% set lang = aStatPanel.language %}
+
+<h1 class="text-primary quickstatpanel-title">{{ aStatPanel.titre }}</h1>
+<ul class="nav nav-tabs">
+  <li role="presentation" class="active"><a href="#">{{ lang["Participation"] }}</a></li>
+  {% if aStatPanel.showSatisfaction %}
+    <li role="presentation">
+        <a href="{{ createUrl(
+            "plugins/direct",
+             ({
+                'plugin' : aStatPanel.className,
+                'function' : 'satisfaction',
+                'sid' : aSurveyInfo.sid
+             })
+            ) }}"
+        >{{ lang["Satisfaction"] }} </a>
+    </li>
+  {% endif %}
+  {% if aStatPanel.showAdminSurvey %}
+    <li role="presentation">
+        <a href="{{ createUrl(
+            "surveyAdministration/view",
+             ({
+                'plugin' : aStatPanel.className,
+                'function' : 'satisfaction',
+                'sid' : aSurveyInfo.sid
+             })
+            ) }}"
+        >{{ lang["Administration"] }} </a>
+    </li>
+  {% endif %}
+</ul>
+{% if aStatPanel.htmlComment %}
+    <div class="well clearfix">{{ aStatPanel.htmlComment }}</div>
+{% endif %}
+
+{% if aStatPanel.aDailyResponses %}
+    {% include './subviews/quickstatpanel/statpanel_participation_rate.twig' with {
+        'title' : lang["Daily participation"],
+        'type' : '',
+        'aResponses' : aStatPanel.aDailyResponses,
+        'showExport' : aStatPanel.showExport,
+        'showSum' : 1,
+        'className' : aStatPanel.className
+    } %}
+{% endif %}
+{% if aStatPanel.aDailyResponsesCumulative %}
+    {% include './subviews/quickstatpanel/statpanel_participation_rate.twig' with {
+        'title' : lang["Daily participation (cumulative)"],
+        'type' : 'cumul',
+        'aResponses' : aStatPanel.aDailyResponsesCumulative,
+        'showExport' : aStatPanel.showExport,
+        'showSum' : 0,
+        'className' : aStatPanel.className
+    } %}
+{% endif %}
+{% if aStatPanel.aDailyEnter %}
+    {% include './subviews/quickstatpanel/statpanel_participation_rate.twig' with {
+        'title' : lang["Number of connections"],
+        'type' : 'enter',
+        'aResponses' : aStatPanel.aDailyEnter,
+        'showExport' : aStatPanel.showExport,
+        'showSum' : 0,
+        'className' : aStatPanel.className
+    } %}
+{% endif %}
+{% if aStatPanel.aDailyAction %}
+    {% include './subviews/quickstatpanel/statpanel_participation_rate.twig' with {
+        'title' : lang["Daily participation rate"],
+        'type' : 'action',
+        'aResponses' : aStatPanel.aDailyAction,
+        'showExport' : aStatPanel.showExport,
+        'showSum' : 0,
+        'className' : aStatPanel.className
+    } %}
+{% endif %}
+
+<div class="panel panel-primary">
+  <div class="panel-heading quickstatpanel-title">
+    <h2 class="quickstat-panel-title">{{ lang["Participation rate"] }}</h2>
+  </div>
+  <div class="panel-body">
+    {% for aResponse in aStatPanel.aResponses %}
+       <table class="quickstat-table quickstat-table-participation table table-bordered table-striped {% if aResponse.max <= 0 %} quickstat-norate{% endif %}">
+        <colgroup>
+          <col class="quickstat-col-answer">
+          {% if aResponse.max > 0 %}<col class="quickstat-col-nbsend">{% endif %}
+          <col class="quickstat-col-response">
+          {% if aResponse.max > 0 %}<col class="quickstat-col-rate">{% endif %}
+        </colgroup>
+        <thead>
+            <tr class="quickstat-header info">
+              <th class="answer-text">{{ aResponse.title }}</th>
+              {% if aResponse.max > 0 %}<th class="quickstat-nbsend text-center">{{ lang["Expected participants"] }}</th>{% endif %}
+              <th class="quickstat-response text-center">{{ lang["Responses"] }}</th>
+              {% if aResponse.max > 0 %}<th class="quickstat-rate text-center">{{ lang["Participation rate"] }}</th>{% endif %}
+            </tr>
+        </thead>
+        <tbody>
+          {% for aResponseData in aResponse.data %}
+          <tr>
+              <th class="answer-text control-label">{{ aResponseData.title }}</th>
+              {% if aResponse.max > 0 %}<td class="quickstat-nbsend text-center">{{ aResponseData.max }}</td>{% endif %}
+              <td class="quickstat-response text-center">{{ aResponseData.completed }}</td>
+              {% if aResponse.max > 0 %}<td class="quickstat-rate text-center">{% if aResponseData.max > 0 %}{{ processString("{round(100*" ~ aResponseData.completed ~ "/" ~ aResponseData.max ~ ")}") }}%{% endif %}</td>{% endif %}
+          </tr>
+          {% endfor %}
+        </tbody>
+       </table>
+    {% endfor %}
+  </div>
+</div>

@@ -19,6 +19,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
  */
+
 class quickStatAdminParticipationAndStat extends PluginBase
 {
     protected $storage = "DbStorage";
@@ -76,7 +77,9 @@ class quickStatAdminParticipationAndStat extends PluginBase
         $this->subscribe("newDirectRequest");
         /* register language */
         $this->subscribe("afterPluginLoad");
+        /* Broken register
         $this->subscribe("getValidScreenFiles");
+        */
     }
 
     /** The settings **/
@@ -518,9 +521,8 @@ class quickStatAdminParticipationAndStat extends PluginBase
                         $oCriteria
                     );
                     if ($iExistingAttribute) {
-                        $oSubQuestions = Question::model()
-                            ->with("questionl10ns")
-                            ->findAll([
+                        $oSubQuestions = Question::model()->with("questionl10ns")->findAll(
+                            [
                                 "condition" =>
                                     "parent_qid=:qid AND questionl10ns.language=:language AND scale_id=:scale_id",
                                 "order" => "question_order",
@@ -1065,21 +1067,17 @@ class quickStatAdminParticipationAndStat extends PluginBase
         $aDataInfos = []; // Use some data for all datas : less easy than $aData['total'][$sColumn]
         foreach ($aQuestionsNumeric as $iQuestionNumeric) {
             /* find the code column */
-            $oQuestion = Question::model()
-                ->with("questionl10ns")
-                ->find(
-                    "t.qid=:qid AND questionl10ns.language=:language",
-                    [
-                        ":qid" => $iQuestionNumeric,
-                        ":language" => $this->surveyLanguage,
-                    ]
+            $oQuestion = Question::model()->with("questionl10ns")->find(
+                "t.qid=:qid AND questionl10ns.language=:language",
+                [
+                    ":qid" => $iQuestionNumeric,
+                    ":language" => $this->surveyLanguage,
+                ]
             );
             if ($oQuestion) {
                 $maxByQuestion = 0;
                 if ($oQuestion->parent_qid) {
-                    $oParentQuestion = Question::model()
-                        ->with("questionl10ns")
-                        ->find(
+                    $oParentQuestion = Question::model()->with("questionl10ns")->find(
                         "t.qid=:qid AND questionl10ns.language=:language",
                         [
                             ":qid" => $oQuestion->parent_qid,
@@ -1087,9 +1085,8 @@ class quickStatAdminParticipationAndStat extends PluginBase
                         ]
                     );
                     if ($oParentQuestion->type == ";") {
-                        $aoSubQuestionX = Question::model()
-                            ->with("questionl10ns")
-                            ->findAll([
+                        $aoSubQuestionX = Question::model()->with("questionl10ns")->findAll(
+                            [
                                 "condition" =>
                                     "parent_qid=:parent_qid and questionl10ns.language=:language and scale_id=:scale_id",
                                 "params" => [
@@ -1115,9 +1112,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
                             $maxByQuestion = intval(
                                 substr($oExistingAttribute->value, 4)
                             );
-                            $oXQuestion = Question::model()
-                                ->with("questionl10ns")
-                                ->find(
+                            $oXQuestion = Question::model()->with("questionl10ns")->find(
                                 "t.qid=:qid AND questionl10ns.language=:language",
                                 [
                                     ":qid" => $oExistingAttribute->qid,
@@ -1236,6 +1231,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
             $aResponses["total"] = [
                 "title" => $this->translate("Population"),
                 "aSatisfactions" => $aData,
+                'type' => 'graph'
             ];
         }
         /* Do it for each */
@@ -1258,14 +1254,6 @@ class quickStatAdminParticipationAndStat extends PluginBase
                     $aTokenValues = $this->getTokenValues($tokenCross);
                     $aData = [];
                     foreach ($aDataInfos as $sColumnName => $aDataInfo) {
-                        /* Start by population */
-                        //~ $aData=array(
-                        //~ array(
-                        //~ 'title'=>gT("Population"),
-                        //~ 'count'=>$this->getCountNumeric($sColumnName,array($tokenCross=>$aTokenValues)),
-                        //~ 'average'=>$this->getAverage($sColumnName,array($tokenCross=>$aTokenValues)),
-                        //~ ),
-                        //~ );
                         $aData = [];
                         foreach ($aTokenValues as $sTokenValue) {
                             $value = $sTokenValue;
@@ -1367,14 +1355,6 @@ class quickStatAdminParticipationAndStat extends PluginBase
                     $aAnswers = Chtml::listData($oAnswers, "code", "answerl10ns.{$this->surveyLanguage}.answer");
                     $aData = [];
                     foreach ($aDataInfos as $sColumnName => $aDataInfo) {
-                        /* Start by population */
-                        //~ $aData=array(
-                        //~ array(
-                        //~ 'title'=>gT("Population"),
-                        //~ 'count'=>$this->getCountNumeric($sColumnName,array($sColumn=>array_keys($aAnswers))),
-                        //~ 'average'=>$this->getAverage($sColumnName,array($sColumn=>array_keys($aAnswers))),
-                        //~ ),
-                        //~ );
                         $aData = [];
                         foreach ($aAnswers as $sCode => $sAnswer) {
                             $aData[] = [
@@ -1429,6 +1409,21 @@ class quickStatAdminParticipationAndStat extends PluginBase
             }
         }
         $this->aRenderData["aResponses"] = $aResponses;
+        $aReorderSatisfactions = array();
+        foreach ($aResponses as $repKey => $aResponse) {
+            foreach ($aResponse['aSatisfactions'] as $iSatId => $aSatisfaction) {
+                if (empty($aReorderSatisfactions[$iSatId])) {
+                    $aReorderSatisfactions[$iSatId] = array(
+                        'title' => $aSatisfaction['title'],
+                        'aResponses' => array()
+                    );
+                }
+                $aReorderSatisfactions[$iSatId]['aResponses'][$repKey] = $aResponses[$repKey]['aSatisfactions'][$iSatId];
+                $aReorderSatisfactions[$iSatId]['aResponses'][$repKey]['title'] = $aResponses[$repKey]['title'];
+                $aReorderSatisfactions[$iSatId]['aResponses'][$repKey]['type'] = isset($aResponse['type']) ? $aResponse['type'] : 'chart';
+            }
+        }
+        $this->aRenderData["aReorderSatisfactions"] = $aReorderSatisfactions;
         $this->aRenderData["htmlComment"] = $this->get(
             "satisfactionComment",
             "Survey",
@@ -1531,6 +1526,14 @@ class quickStatAdminParticipationAndStat extends PluginBase
             }
         }
         $this->aRenderData["aSurveys"] = $aFinalSurveys;
+        $this->aRenderData["surveysGrid"] = $this->renderPartial(
+            'subviews.surveys_grid',
+            [
+                'aSurveys' => $aFinalSurveys,
+                'className' => get_class($this)
+            ],
+            true
+        );
         $this->render("list_surveys");
     }
     /**
@@ -1561,16 +1564,17 @@ class quickStatAdminParticipationAndStat extends PluginBase
     }
     /**
      * rendering a file in plugin view
-     * @param $fileRender the file to render (in views/subviews)
+     * @param string $type : the statitistics type, file to render (in views/subviews)
      * @return void
      */
-    private function render($fileRender)
+    private function render($type)
     {
         Yii::setPathOfAlias(
             "quickStatAdminParticipationAndStat",
             dirname(__FILE__)
         );
         $oEvent = $this->event;
+        $this->updateTwigConfiguration();
         $this->aRenderData[
             "assetUrl"
         ] = $sAssetUrl = Yii::app()->assetManager->publish(
@@ -1579,7 +1583,8 @@ class quickStatAdminParticipationAndStat extends PluginBase
         $this->aRenderData["jqplotUrl"] = Yii::app()->assetManager->publish(
             dirname(__FILE__) . "/vendor/jquery.jqplot"
         );
-        $this->aRenderData["subview"] = "subviews.{$fileRender}";
+        $this->aRenderData["subview"] = "subviews.{$type}";
+        $this->aRenderData["type"] = $type;
         $this->aRenderData["surveyList"] = $this->getSurveyList();
         $this->aRenderData["showSatisfaction"] = count(
             $this->get("questionNumeric", "Survey", $this->iSurveyId, [])
@@ -1590,13 +1595,9 @@ class quickStatAdminParticipationAndStat extends PluginBase
                 "surveysettings",
                 "update"
             ) && !$this->onlyStatAccess();
+        $this->aRenderData["showExport"] = Permission::model()->hasSurveyPermission($this->iSurveyId, "response", "export");
         $this->aRenderData["showAdmin"] = !$this->onlyStatAccess();
         $this->aRenderData["className"] = self::$name;
-        $this->aRenderData["content"] = App()->controller->renderPartial(
-            "quickStatAdminParticipationAndStat.views.content",
-            $this->aRenderData,
-            1
-        );
         $this->subscribe("getPluginTwigPath", "getPluginTwigPathRender");
         if (empty($this->iSurveyId)) {
             $this->renderNoSurvey();
@@ -1631,6 +1632,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
                 "sid" => $this->iSurveyId,
             ]
         );
+        $twigRenderData["aStatPanel"]["language"] = $this->getRenderLanguageStrings();
         App()->clientScript->registerScriptFile(
             Yii::app()->getConfig("generalscripts") . "nojs.js",
             CClientScript::POS_HEAD
@@ -1682,6 +1684,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
         );
         Yii::app()->end();
     }
+
     public function getPluginTwigPath()
     {
         if (!$this->getEvent()) {
@@ -1690,6 +1693,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
         $viewPath = dirname(__FILE__) . "/twig";
         $this->getEvent()->append("add", [$viewPath]);
     }
+
     public function getPluginTwigPathRender()
     {
         if (!$this->getEvent()) {
@@ -1699,6 +1703,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
         $forcedPath = dirname(__FILE__) . "/twig_replace";
         $this->getEvent()->append("replace", [$forcedPath]);
     }
+
     public function getValidScreenFiles()
     {
         if (!$this->getEvent()) {
@@ -1718,55 +1723,21 @@ class quickStatAdminParticipationAndStat extends PluginBase
             "subviews/quickstatpanel/statpanel_param.twig",
         ]);
     }
+
     /**
-     * rendering a file in plugin view
-     * @param $fileRender the file to render (in views/subviews)
-     * @return void
+     * Add needed functgion to twig
      */
-    private function renderPre3($fileRender)
+    private function updateTwigConfiguration()
     {
-        Yii::app()->clientScript->addPackage(
-            "boostrap-quickStatAdminParticipationAndStat",
+        $twigRenderer = App()->twigRenderer;
+        $twigRenderer->addFilters(
             [
-                "basePath" =>
-                    "quickStatAdminParticipationAndStat.vendor.bootstrap",
-                "css" => ["css/bootstrap.min.css"],
-                "js" => ["js/bootstrap.min.js"],
-                "depends" => ["jquery"],
+                'number_format',
+                'date_format'
             ]
         );
-        $oEvent = $this->event;
-        Yii::app()->controller->layout = "bare"; // bare don't have any HTML
-        Yii::app()
-            ->getClientScript()
-            ->registerPackage("boostrap-quickStatAdminParticipationAndStat");
-        $this->aRenderData[
-            "assetUrl"
-        ] = $sAssetUrl = Yii::app()->assetManager->publish(
-            dirname(__FILE__) . "/assets"
-        );
-        //~ $this->aRenderData['chartjsUrl']=Yii::app()->assetManager->publish(dirname(__FILE__) . '/vendor/Chart.js');
-        $this->aRenderData["jqplotUrl"] = Yii::app()->assetManager->publish(
-            dirname(__FILE__) . "/vendor/jquery.jqplot"
-        );
-        $this->aRenderData["subview"] = "subviews.{$fileRender}";
-        $this->aRenderData["surveyList"] = $this->getSurveyList();
-        $this->aRenderData["showSatisfaction"] = count(
-            $this->get("questionNumeric", "Survey", $this->iSurveyId, [])
-        );
-        $this->aRenderData["showAdminSurvey"] =
-            Permission::model()->hasSurveyPermission(
-                $this->iSurveyId,
-                "surveysettings",
-                "update"
-            ) && !$this->onlyStatAccess();
-        $this->aRenderData["showAdmin"] = !$this->onlyStatAccess();
-        $this->aRenderData["className"] = self::$name;
-        Yii::app()->controller->render(
-            "quickStatAdminParticipationAndStat.views.layout",
-            $this->aRenderData
-        );
     }
+
     /**
      * Return the survey with allowed access
      */
@@ -1826,6 +1797,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
         }
         return $aStatSurveys;
     }
+
     /**
      * Update plugin settings for the link and lang
      */
@@ -1853,6 +1825,31 @@ class quickStatAdminParticipationAndStat extends PluginBase
         );
         return parent::getPluginSettings($getValues);
     }
+
+    /**
+     * Get the lanuage strings for twig render
+     * @return string[] : string in english => translated string
+     */
+    private function getRenderLanguageStrings()
+    {
+        return array(
+            "Participation" => $this->translate("Participation"),
+            "Satisfaction" => $this->translate("Satisfaction"),
+            "Administration" => $this->translate("Administration"),
+            "Population" => $this->translate("Population"),
+            "Export" => $this->translate("Export"),
+            "Daily participation" => $this->translate("Daily participation"),
+            "Daily participation (cumulative)" => $this->translate("Daily participation (cumulative)"),
+            "Number of connections" => $this->translate("Number of connections"),
+            "Daily participation rate" => $this->translate("Daily participation rate"),
+            "Expected participants" => $this->translate("Expected participants"),
+            "Responses" => $this->translate("Responses"),
+            "Participation rate" => $this->translate("Participation rate"),
+            "string" => $this->translate("string"),
+            "string" => $this->translate("string"),
+        );
+    }
+
     /**
      * Get the moyenne for a numeric question type
      * @param : $sColumn : column title
@@ -2020,6 +2017,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
         }
         return $iCountNumeric;
     }
+
     /**
      * get the array of token values
      * @param string attribute to take (column name)
@@ -2048,6 +2046,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
             return $aTokenValues;
         }
     }
+
     /**
      * Translate a plugin string
      * @param string $string to translate
@@ -2057,6 +2056,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
     {
         return Yii::t("", $string, [], self::$name);
     }
+
     /**
      * Add this translation just after loaded all plugins
      * @see event afterPluginLoad

@@ -8,14 +8,20 @@
  */
 
 .jqplot-target{max-width:100%}
-.brand img{height:2em;width:auto}
 
 .jqplot-line .jqplot-point-label{color:#333}
-.nopercentage .rate{border-left:0px none}
-.nopercentage .response{border-left:0px none}
 .chart-day .jqplot-xaxis canvas:first-child{display:none}
 .chart-day .jqplot-xaxis canvas:last-child{display:none}
 
-/*
-.chart-day .jqplot-xaxis .jqplot-xaxis-tick{display:none}
-*/
+.quickstat-table{table-layout:fixed;width:100%}
+.quickstat-table .quickstat-col-answer{width:55%}
+.quickstat-table .quickstat-col-nbsend{width:15%}
+.quickstat-table .quickstat-col-rate{width:15%}
+.quickstat-table .quickstat-col-response{width:15%}
+.quickstat-table.quickstat-norate .quickstat-col-response{width:45%}
+.quickstat-panel-title{
+    margin-top: 0;
+    margin-bottom: 0;
+    color: inherit;
+}
+.quickstat-panel-title small{color: inherit;}

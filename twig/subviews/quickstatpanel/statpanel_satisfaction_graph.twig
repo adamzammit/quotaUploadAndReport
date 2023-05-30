@@ -1,0 +1,53 @@
+<h3 class="text-info quickstatpanel-title">{{ aResponse.title }}</h3>
+<div id="twigchart-r{{ repKey }}-s{{ iSatId }}" class="quickstat-graph"> </div>
+
+{% set aLabels = [] %}
+{% set aAverage = [] %}
+{% for aData in aResponse.datas %}
+  {% set aLabels = aLabels|merge([aData.title ~ " (" ~ aData.count ~ ")"]) %}
+  {% set aAverage = aAverage|merge([aData.average]) %}
+{% endfor %}
+{% set angle = 0 %}
+{% if count(aLabels) > 6 %}
+  {% set angle = -15 %}
+{% endif %}
+<script>
+$(function() {
+  $.jqplot.config.enablePlugins = true;
+  let s1 = {{ json_encode(aAverage) }};
+  let ticks = {{ json_encode(aLabels) }};
+  var twigplotr{{ repKey }}s{{ iSatId }}  = $.jqplot('twigchart-r{{ repKey }}-s{{ iSatId }}', [s1], {
+    animate: false,
+    seriesColors:[quickstatpanel.seriecolor],
+    seriesDefaults:{
+    renderer:$.jqplot.BarRenderer,
+    pointLabels: {
+      show: true,
+      location: 's',
+      formatString: "%#.2f",
+      color : quickstatpanel.labelcolor
+    }
+    },
+    grid:{
+      background : quickstatpanel.gridcolor
+    },
+    axes: {
+      xaxis: {
+        renderer: $.jqplot.CategoryAxisRenderer,
+        ticks: ticks,
+        tickOptions: {
+          angle: {{ angle }},
+          textColor: quickstatpanel.ticktexcolor
+        },
+        labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+        tickRenderer: $.jqplot.CanvasAxisTickRenderer
+      },
+      yaxis:{
+        min : {{ aResponse.min }},
+        max : {{ aResponse.max }}
+      }
+    },
+    highlighter: { show: false }
+  });
+});
+</script>
