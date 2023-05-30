@@ -1,0 +1,178 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: quickStatAdminParticipationAndStat\n"
+"POT-Creation-Date: 2023-05-30 12:08+0200\n"
+"PO-Revision-Date: 2023-05-30 12:09+0200\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 2.4.2\n"
+"X-Poedit-Basepath: ..\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-KeywordsList: translate\n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Poedit-SearchPathExcluded-0: vendor\n"
+
+#: quickStatAdminParticipationAndStat.php:107
+msgid "Link to statitics :"
+msgstr "Lien vers les statitistiques :"
+
+#: quickStatAdminParticipationAndStat.php:116
+msgid "Survey is not activated : no statistics can be shown."
+msgstr ""
+"Le questionnaire n'est pas activé, les statistiques ne peuvent être "
+"affichées."
+
+#: quickStatAdminParticipationAndStat.php:123
+msgid "Alternate title"
+msgstr "Titre alternatif"
+
+#: quickStatAdminParticipationAndStat.php:133
+msgid "Expected participation"
+msgstr "Participation attendue"
+
+#: quickStatAdminParticipationAndStat.php:135
+msgid "If survey didn't have token : used for participation rate."
+msgstr ""
+
+#: quickStatAdminParticipationAndStat.php:149
+msgid "Participation tab"
+msgstr ""
+
+#: quickStatAdminParticipationAndStat.php:156
+msgid "Description for participation tab"
+msgstr ""
+
+#: quickStatAdminParticipationAndStat.php:170
+msgid "Show the number of completed daily responses."
+msgstr ""
+
+#: quickStatAdminParticipationAndStat.php:183
+msgid "Show the number of completed daily cumulative responses."
+msgstr ""
+
+#: quickStatAdminParticipationAndStat.php:204
+msgid "Show the number of daily entries."
+msgstr ""
+
+#: quickStatAdminParticipationAndStat.php:226
+msgid "Show the number of daily activities."
+msgstr ""
+
+#: quickStatAdminParticipationAndStat.php:241
+msgid ""
+"Survey are not date stamped: Le questionnaire n'est pas daté: it's not "
+"possible to show daily rates."
+msgstr ""
+
+#: quickStatAdminParticipationAndStat.php:293
+#: quickStatAdminParticipationAndStat.php:602
+msgid "Token attributes for pivot (cross-sectional)"
+msgstr ""
+
+#: quickStatAdminParticipationAndStat.php:322
+msgid "Question  for pivot (cross-sectional)"
+msgstr ""
+
+#: quickStatAdminParticipationAndStat.php:566
+msgid "Satisfaction tab"
+msgstr ""
+
+#: quickStatAdminParticipationAndStat.php:571
+msgid "Description for satisfaction tab"
+msgstr ""
+
+#: quickStatAdminParticipationAndStat.php:583
+msgid "Questions of satisfaction"
+msgstr "Questions de satisfaction"
+
+#: quickStatAdminParticipationAndStat.php:617
+msgid "Question for pivot (in graphic)"
+msgstr "Questions croisées (pour les graphes)"
+
+#: quickStatAdminParticipationAndStat.php:645
+msgid "Question for pivot (in array)"
+msgstr "Questions croisées (pour les tableaux)"
+
+#: quickStatAdminParticipationAndStat.php:930
+#: quickStatAdminParticipationAndStat.php:1232
+#: quickStatAdminParticipationAndStat.php:1839
+msgid "Population"
+msgstr "Population"
+
+#: quickStatAdminParticipationAndStat.php:934
+#: quickStatAdminParticipationAndStat.php:1217
+msgid "Total Population"
+msgstr "Population totale"
+
+#: quickStatAdminParticipationAndStat.php:1459
+msgid "Nb"
+msgstr "Nb"
+
+#: quickStatAdminParticipationAndStat.php:1812
+msgid "The link to the statistics is:"
+msgstr ""
+
+#: quickStatAdminParticipationAndStat.php:1815
+msgid "Activate daily participation"
+msgstr "Activer la participation journalière"
+
+#: quickStatAdminParticipationAndStat.php:1818
+msgid "This allow to activate daily participation by survey"
+msgstr ""
+
+#: quickStatAdminParticipationAndStat.php:1821
+msgid "Activate daily action"
+msgstr "Activer les actions journaliers"
+
+#: quickStatAdminParticipationAndStat.php:1824
+msgid "This allow to activate daily action by survey"
+msgstr ""
+
+#: quickStatAdminParticipationAndStat.php:1836
+msgid "Participation"
+msgstr "Participation"
+
+#: quickStatAdminParticipationAndStat.php:1837
+msgid "Satisfaction"
+msgstr "Satisfaction"
+
+#: quickStatAdminParticipationAndStat.php:1838
+msgid "Administration"
+msgstr "Administration"
+
+#: quickStatAdminParticipationAndStat.php:1840
+msgid "Export"
+msgstr "Export"
+
+#: quickStatAdminParticipationAndStat.php:1841
+msgid "Daily participation"
+msgstr "Participation journalière"
+
+#: quickStatAdminParticipationAndStat.php:1842
+msgid "Daily participation (cumulative)"
+msgstr "Participation journalière (cumulative)"
+
+#: quickStatAdminParticipationAndStat.php:1843
+msgid "Number of connections"
+msgstr "Nombre de connexions"
+
+#: quickStatAdminParticipationAndStat.php:1844
+msgid "Daily participation rate"
+msgstr "Taux de participation journalière"
+
+#: quickStatAdminParticipationAndStat.php:1845
+msgid "Expected participants"
+msgstr "Participants attendus"
+
+#: quickStatAdminParticipationAndStat.php:1846
+msgid "Responses"
+msgstr "Réponses"
+
+#: quickStatAdminParticipationAndStat.php:1847
+msgid "Participation rate"
+msgstr "Taux de participation"

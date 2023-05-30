@@ -1845,8 +1845,6 @@ class quickStatAdminParticipationAndStat extends PluginBase
             "Expected participants" => $this->translate("Expected participants"),
             "Responses" => $this->translate("Responses"),
             "Participation rate" => $this->translate("Participation rate"),
-            "string" => $this->translate("string"),
-            "string" => $this->translate("string"),
         );
     }
 
