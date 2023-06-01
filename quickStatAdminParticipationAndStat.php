@@ -67,8 +67,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
         if (version_compare(App()->getConfig("versionnumber"), "4", "<")) {
             return;
         }
-        /* Disable default admin view */
-        $this->subscribe("beforeControllerAction");
+
         //~ $this->subscribe('afterSuccessfulLogin');
         /* Survey settings */
         $this->subscribe("beforeSurveySettings");
@@ -288,7 +287,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
                 $aSettings["tokenAttributes"] = [
                     "type" => "select",
                     "label" => $this->translate(
-                        "Token attributes for pivot (cross-sectional)"
+                        "Token attributes for pivot (cross-sectional) - graph"
                     ),
                     "options" => $aOptions,
                     "htmlOptions" => ["multiple" => "multiple"],
@@ -597,12 +596,25 @@ class quickStatAdminParticipationAndStat extends PluginBase
                 $aSettings["tokenAttributesSatisfaction"] = [
                     "type" => "select",
                     "label" => $this->translate(
-                        "Token attributes for pivot (cross-sectional)"
+                        "Token attributes for pivot (graph)"
                     ),
                     "options" => $aOptions,
                     "htmlOptions" => ["multiple" => "multiple"],
                     "current" => $this->get(
                         "tokenAttributesSatisfaction",
+                        "Survey",
+                        $oEvent->get("survey")
+                    ),
+                ];
+                $aSettings["tokenAttributesSatisfactionTable"] = [
+                    "type" => "select",
+                    "label" => $this->translate(
+                        "Token attributes for pivot (table)"
+                    ),
+                    "options" => $aOptions,
+                    "htmlOptions" => ["multiple" => "multiple"],
+                    "current" => $this->get(
+                        "tokenAttributesSatisfactionTable",
                         "Survey",
                         $oEvent->get("survey")
                     ),
@@ -696,6 +708,11 @@ class quickStatAdminParticipationAndStat extends PluginBase
         )
             ? $aSettings["tokenAttributesSatisfaction"]
             : null;
+        $aSettings["tokenAttributesSatisfactionTable"] = isset(
+            $aSettings["tokenAttributesSatisfactionTable"]
+        )
+            ? $aSettings["tokenAttributesSatisfactionTable"]
+            : null;
         $aSettings["questionCrossSatisfaction"] = isset(
             $aSettings["questionCrossSatisfaction"]
         )
@@ -725,26 +742,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
             );
         }
     }
-    /**
-     * Always redirect user to stat if don't have Global survey access
-     */
-    public function beforeControllerAction()
-    {
-        if (!$this->getEvent()) {
-            throw new CHttpException(403);
-        }
-        if (
-            $this->onlyStatAccess() &&
-            ($this->event->get("controller") == "admin" &&
-                $this->event->get("action") != "authentication")
-        ) {
-            Yii::app()->controller->redirect([
-                "plugins/direct",
-                "plugin" => $this->getName(),
-                "function" => "list",
-            ]);
-        }
-    }
+
     /**
      * The request action test
      */
@@ -1233,59 +1231,82 @@ class quickStatAdminParticipationAndStat extends PluginBase
             ];
         }
         /* Do it for each */
-        $aTokenCross = $this->get(
+        $aTokenCrossGraph = $this->get(
             "tokenAttributesSatisfaction",
             "Survey",
             $this->iSurveyId,
             []
         );
+        $aTokenCrossTable = $this->get(
+            "tokenAttributesSatisfactionTable",
+            "Survey",
+            $this->iSurveyId,
+            []
+        );
+        $aAllTokenCross = array_unique(array_merge($aTokenCrossGraph, $aTokenCrossTable));
         if (
             !empty($aDataInfos) &&
-            !empty($aTokenCross) &&
+            !empty($aAllTokenCross) &&
             tableExists("{{tokens_{$this->iSurveyId}}}")
         ) {
             $aValidAttributes = Token::model(
                 $this->iSurveyId
             )->attributeLabels();
-            foreach ($aTokenCross as $tokenCross) {
-                if (array_key_exists($tokenCross, $aValidAttributes)) {
-                    $aTokenValues = $this->getTokenValues($tokenCross);
+            $aAllTokenCross = array_intersect(
+                array_keys($aValidAttributes),
+                $aAllTokenCross
+            );
+            foreach ($aAllTokenCross as $tokenCross) {
+                $aTokenValues = $this->getTokenValues($tokenCross);
+                $aData = [];
+                foreach ($aDataInfos as $sColumnName => $aDataInfo) {
                     $aData = [];
-                    foreach ($aDataInfos as $sColumnName => $aDataInfo) {
-                        $aData = [];
-                        foreach ($aTokenValues as $sTokenValue) {
-                            $value = $sTokenValue;
-                            $aData[] = [
-                                "title" => viewHelper::flatEllipsizeText(
-                                    $sTokenValue,
-                                    true,
-                                    false
-                                ),
-                                "count" => $this->getCountNumeric(
-                                    $sColumnName,
-                                    [$tokenCross => $sTokenValue]
-                                ),
-                                "average" => $this->getAverage($sColumnName, [
-                                    $tokenCross => $sTokenValue,
-                                ]),
-                            ];
-                        }
-                        if (!empty($aData)) {
-                            $aSatisfaction[$sColumnName] = [
-                                "title" => $aDataInfos[$sColumnName]["title"],
-                                "min" => 0,
-                                "max" => $aDataInfos[$sColumnName]["max"],
-                                "datas" => $aData,
-                            ];
-                        }
+                    foreach ($aTokenValues as $sTokenValue) {
+                        $value = $sTokenValue;
+                        $aData[] = [
+                            "title" => viewHelper::flatEllipsizeText(
+                                $sTokenValue,
+                                true,
+                                false
+                            ),
+                            "count" => $this->getCountNumeric(
+                                $sColumnName,
+                                [$tokenCross => $sTokenValue]
+                            ),
+                            "average" => $this->getAverage($sColumnName, [
+                                $tokenCross => $sTokenValue,
+                            ]),
+                        ];
                     }
-                    $aResponses[$tokenCross] = [
+                    if (!empty($aData)) {
+                        $aSatisfaction[$sColumnName] = [
+                            "title" => $aDataInfos[$sColumnName]["title"],
+                            "min" => 0,
+                            "max" => $aDataInfos[$sColumnName]["max"],
+                            "datas" => $aData,
+                        ];
+                    }
+                }
+                if (in_array($tokenCross, $aTokenCrossGraph)) {
+                    $aResponses[$tokenCross . "_graph"] = [
                         "title" => viewHelper::flatEllipsizeText(
                             $aValidAttributes[$tokenCross],
                             true,
                             false
                         ),
                         "aSatisfactions" => $aSatisfaction,
+                        'type' => 'graph'
+                    ];
+                }
+                if (in_array($tokenCross, $aTokenCrossTable)) {
+                    $aResponses[$tokenCross . "_table"] = [
+                        "title" => viewHelper::flatEllipsizeText(
+                            $aValidAttributes[$tokenCross],
+                            true,
+                            false
+                        ),
+                        "aSatisfactions" => $aSatisfaction,
+                        'type' => 'table'
                     ];
                 }
             }
