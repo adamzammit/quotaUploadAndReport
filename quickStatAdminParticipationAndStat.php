@@ -919,8 +919,10 @@ class quickStatAdminParticipationAndStat extends PluginBase
         /* Total */
         if (tableExists("{{tokens_{$iSurveyId}}}")) {
             $max = Token::model($iSurveyId)->count(); // see with Token::model($iSurveyId)->empty()->count()
+            $source = 'token';
         } else {
             $max = $this->get("numberMax", "Survey", $iSurveyId, 0);
+            $source = 'estimate';
         }
         $aResponses["total"] = [
             "title" => $this->translate("Population"),
@@ -934,6 +936,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
                     ),
                 ],
             ],
+            'source' => $source
         ];
         /* by token */
         $aTokenCross = $this->get("tokenAttributes", "Survey", $iSurveyId);
@@ -974,6 +977,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
                         ),
                         "max" => $max,
                         "data" => $aData,
+                        'source' => 'token'
                     ];
                 }
             }
@@ -1035,6 +1039,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
                         ),
                         "max" => $globalMax,
                         "data" => $aData,
+                        'source' => 'estimate'
                     ];
                 }
             }
@@ -1862,8 +1867,11 @@ class quickStatAdminParticipationAndStat extends PluginBase
             "Number of connections" => $this->translate("Number of connections"),
             "Daily participation rate" => $this->translate("Daily participation rate"),
             "Expected participants" => $this->translate("Expected participants"),
+            "Invitation sent" => $this->translate("Invitation sent"),
             "Responses" => $this->translate("Responses"),
             "Participation rate" => $this->translate("Participation rate"),
+            /* Not used but can be used in SurveyThemeTwig */
+            'Mailings' => $this->translate("Mailings")
         );
     }
 

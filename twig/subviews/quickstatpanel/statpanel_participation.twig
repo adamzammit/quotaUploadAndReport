@@ -91,7 +91,7 @@
         <thead>
             <tr class="quickstat-header info">
               <th class="answer-text">{{ aResponse.title }}</th>
-              {% if aResponse.max > 0 %}<th class="quickstat-nbsend text-center">{{ lang["Expected participants"] }}</th>{% endif %}
+              {% if aResponse.max > 0 %}<th class="quickstat-nbsend text-center">{% if aResponse.source == 'token' %}{{ lang["Invitation sent"] }} {% else %}{{ lang["Expected participants"] }}{% endif %}</th>{% endif %}
               <th class="quickstat-response text-center">{{ lang["Responses"] }}</th>
               {% if aResponse.max > 0 %}<th class="quickstat-rate text-center">{{ lang["Participation rate"] }}</th>{% endif %}
             </tr>
