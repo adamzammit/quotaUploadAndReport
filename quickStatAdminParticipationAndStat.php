@@ -824,9 +824,6 @@ class quickStatAdminParticipationAndStat extends PluginBase
             $sAction = false;
         }
         switch ($sAction) {
-            case "list":
-                $this->actionList();
-                break;
             case "participation":
                 $this->actionParticipation();
                 break;
@@ -836,6 +833,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
             case "export":
                 $this->actionExportData();
                 break;
+            case "list":
             default:
                 $this->actionList();
                 break;
@@ -1236,13 +1234,13 @@ class quickStatAdminParticipationAndStat extends PluginBase
             ];
         }
         /* Do it for each */
-        $aTokenCrossGraph = $this->get(
+        $aTokenCrossGraph =  (array) $this->get(
             "tokenAttributesSatisfaction",
             "Survey",
             $this->iSurveyId,
             []
         );
-        $aTokenCrossTable = $this->get(
+        $aTokenCrossTable = (array) $this->get(
             "tokenAttributesSatisfactionTable",
             "Survey",
             $this->iSurveyId,
@@ -1775,6 +1773,13 @@ class quickStatAdminParticipationAndStat extends PluginBase
             return $aStatSurveys;
         }
         $oCriteria = new CdbCriteria();
+        $oCriteria->select = ['sid', 'active', 'language'];
+        $oCriteria->with = ['languagesettings' => [
+                'select'=>'surveyls_title',
+                'where'=>'t.language = languagesettings.language'
+            ]
+        ];
+        $oCriteria->params[":active"] = "Y";
         $oCriteria->condition = "active=:active";
         $oCriteria->params[":active"] = "Y";
         if (!Permission::model()->hasGlobalPermission("surveys", "read")) {
@@ -1792,11 +1797,6 @@ class quickStatAdminParticipationAndStat extends PluginBase
             );
         }
         $aSurveys = Survey::model()
-            ->with([
-                "languagesettings" => [
-                    "condition" => "surveyls_language=language",
-                ],
-            ])
             ->findAll($oCriteria);
         $aStatSurveys = [];
         if (!empty($aSurveys)) {

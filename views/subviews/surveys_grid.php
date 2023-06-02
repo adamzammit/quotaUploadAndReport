@@ -1,9 +1,9 @@
 <?php
     $dataProvider = new CArrayDataProvider($aSurveys, array(
         'keyField' => 'sid',
-        'caseSensitiveSort'=>false,
+        'caseSensitiveSort' => false,
         'sort' => array(
-            'attributes'=>array(
+            'attributes' => array(
                  'sid', 'title','responsesCount','tokensCount'
             ),
         ),
@@ -12,10 +12,11 @@
         ),
     ));
     $this->widget('bootstrap.widgets.TbGridView', array(
-        'dataProvider'=>$dataProvider,
+        'dataProvider' => $dataProvider,
+        'htmlOptions' => ['class' => 'table-responsive grid-view-quickstats'],
         'ajaxUpdate' => true,
-        'rowCssClassExpression'=>'$data["responsesCount"]==0?"hidden hide":""',
-        'columns'=>array(
+        'rowCssClassExpression' => '$data["responsesCount"]==0?"hidden hide":""',
+        'columns' => array(
             array(
                 'name' => 'sid',
                 'sortable' => true,
@@ -30,16 +31,16 @@
                 'value' => '$data["title"]',
             ),
             array(
-                'name'=>'responsesCount',
-                'sortable'=>true,
-                'header'=>\Yii::t('', "Responses", array(), $className),
-                'value'=>'$data["responsesCount"]',
+                'name' => 'responsesCount',
+                'sortable' => true,
+                'header' => \Yii::t('', "Responses", array(), $className),
+                'value' => '$data["responsesCount"]',
             ),
             array(
-                'name'=>'tokensCount',
-                'sortable'=>true,
-                'header'=>\Yii::t('', "Expected participants", array(), $className),
-                'value'=>'($data["tokensCount"] ? $data["tokensCount"] : "/");',
+                'name' => 'tokensCount',
+                'sortable' => true,
+                'header' => \Yii::t('', "Expected participants", array(), $className),
+                'value' => '($data["tokensCount"] ? $data["tokensCount"] : "/");',
             ),
         ),
     ));
