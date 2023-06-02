@@ -1524,13 +1524,24 @@ class quickStatAdminParticipationAndStat extends PluginBase
         $this->aRenderData["titre"] = gt("Surveys");
         $aStatSurveys = $this->getSurveyList();
         $aFinalSurveys = [];
+        $aFooter = [
+            'responsesTotal' => 0,
+            'responsesCount' => 0,
+            'tokensCount' => 0,
+            'responsesTokenTotal' => 0,
+            'responsesTokenCount' => 0,
+            'rateTotal' => "",
+            'rateCount' => "",
+        ];
         foreach ($aStatSurveys as $aStatSurvey) {
-            $aStatSurvey["responseTotal"] = Response::model(
+            $aStatSurvey["responsesTotal"] = Response::model(
                 $aStatSurvey["sid"]
             )->count();
+            $aFooter['responsesTotal'] += $aStatSurvey["responsesTotal"];
             $aStatSurvey["responsesCount"] = Response::model(
                 $aStatSurvey["sid"]
             )->count("submitdate IS NOT NULL");
+            $aFooter['responsesCount'] += $aStatSurvey["responsesCount"];
             if (tableExists("{{tokens_{$aStatSurvey["sid"]}}}")) {
                 $aStatSurvey["tokensCount"] = Token::model(
                     $aStatSurvey["sid"]
@@ -1543,15 +1554,33 @@ class quickStatAdminParticipationAndStat extends PluginBase
                     0
                 );
             }
+            $aFooter['tokensCount'] += $aStatSurvey["tokensCount"];
+            if ($aStatSurvey["tokensCount"] > 0) {
+                $aStatSurvey["rateTotal"] = $aStatSurvey["responsesTotal"]/$aStatSurvey["tokensCount"];
+                $aStatSurvey["rateCount"] = $aStatSurvey["responsesCount"]/$aStatSurvey["tokensCount"];
+                $aFooter['responsesTokenTotal'] += $aStatSurvey["responsesTotal"];
+                $aFooter['responsesTokenCount'] += $aStatSurvey["responsesCount"];
+            } else {
+                $aStatSurvey["rateTotal"] = "";
+                $aStatSurvey["rateCount"] = "";
+            }
             if (intval($aStatSurvey["responsesCount"]) > 0) {
                 $aFinalSurveys[] = $aStatSurvey;
             }
+        }
+        if ($aFooter['responsesTokenTotal'] > 0) {
+            $aFooter["rateTotal"] = $aFooter["responsesTotal"]/$aFooter["responsesTokenTotal"];
+        }
+        if ($aFooter['responsesTokenCount'] > 0) {
+            $aFooter["rateCount"] = $aFooter["responsesCount"]/$aFooter["responsesTokenCount"];
         }
         $this->aRenderData["aSurveys"] = $aFinalSurveys;
         $this->aRenderData["surveysGrid"] = $this->renderPartial(
             'subviews.surveys_grid',
             [
                 'aSurveys' => $aFinalSurveys,
+                'aFooter' => $aFooter,
+                'language' => $this->getRenderLanguageStrings(),
                 'className' => get_class($this)
             ],
             true
@@ -1870,8 +1899,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
             "Invitation sent" => $this->translate("Invitation sent"),
             "Responses" => $this->translate("Responses"),
             "Participation rate" => $this->translate("Participation rate"),
-            /* Not used but can be used in SurveyThemeTwig */
-            'Mailings' => $this->translate("Mailings")
+            'Total' => $this->translate("Total")
         );
     }
 

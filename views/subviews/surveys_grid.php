@@ -1,4 +1,5 @@
 <?php
+
     $dataProvider = new CArrayDataProvider($aSurveys, array(
         'keyField' => 'sid',
         'caseSensitiveSort' => false,
@@ -7,8 +8,8 @@
                  'sid', 'title','responsesCount','tokensCount'
             ),
         ),
-        'pagination'=>array(
-            'pageSize'=>20,
+        'pagination' => array(
+            'pageSize' => 20,
         ),
     ));
     $this->widget('bootstrap.widgets.TbGridView', array(
@@ -23,24 +24,35 @@
                 'header' => gT("ID"),
                 'type' => 'raw',
                 'value' => 'CHtml::link($data["sid"],array("plugins/direct","plugin"=>"' . $className . '","function"=>"participation","sid"=>$data["sid"]))',
+                'footer' => ""
             ),
             array(
                 'name' => 'surveyls_title',
                 'sortable' => true,
                 'header' => gT("Title"),
                 'value' => '$data["title"]',
+                'footer' => '<strong>' . $language["Total"] . '</strong>',
             ),
             array(
                 'name' => 'responsesCount',
                 'sortable' => true,
-                'header' => \Yii::t('', "Responses", array(), $className),
+                'header' => $language["Responses"],
                 'value' => '$data["responsesCount"]',
+                'footer' => '<strong>' . $aFooter['responsesCount'] . '</strong>',
             ),
             array(
                 'name' => 'tokensCount',
                 'sortable' => true,
-                'header' => \Yii::t('', "Expected participants", array(), $className),
+                'header' => $language["Expected participants"],
                 'value' => '($data["tokensCount"] ? $data["tokensCount"] : "/");',
+                'footer' => '<strong>' . $aFooter['tokensCount'] . '</strong>',
+            ),
+            array(
+                'name' => 'tokensCount',
+                'sortable' => true,
+                'header' => $language["Participation rate"],
+                'value' => '($data["rateCount"] ? round($data["rateCount"] * 100, 0) . "%" : "/");',
+                'footer' => $aFooter['rateCount'] ? '<strong>' . round($aFooter["rateCount"] * 100, 0) . "%"  . '</strong>' : "/",
             ),
         ),
     ));
