@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: quickStatAdminParticipationAndStat\n"
-"POT-Creation-Date: 2023-06-01 20:01+0200\n"
-"PO-Revision-Date: 2023-06-01 20:02+0200\n"
+"POT-Creation-Date: 2023-06-08 19:44+0200\n"
+"PO-Revision-Date: 2023-06-08 19:45+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: fr\n"
@@ -105,85 +105,92 @@ msgstr "Questions croisées (pour les graphes)"
 msgid "Question for pivot (in array)"
 msgstr "Questions croisées (pour les tableaux)"
 
-#: quickStatAdminParticipationAndStat.php:928
-#: quickStatAdminParticipationAndStat.php:1233
-#: quickStatAdminParticipationAndStat.php:1863
-msgid "Population"
-msgstr "Population"
-
-#: quickStatAdminParticipationAndStat.php:932
-#: quickStatAdminParticipationAndStat.php:1218
-msgid "Total Population"
-msgstr "Population totale"
-
-#: quickStatAdminParticipationAndStat.php:1483
-msgid "Nb"
-msgstr "Nb"
-
-#: quickStatAdminParticipationAndStat.php:1836
-msgid "The link to the statistics is:"
-msgstr ""
-
-#: quickStatAdminParticipationAndStat.php:1839
-msgid "Activate daily participation"
-msgstr "Activer la participation journalière"
-
-#: quickStatAdminParticipationAndStat.php:1842
-msgid "This allow to activate daily participation by survey"
-msgstr ""
-
-#: quickStatAdminParticipationAndStat.php:1845
-msgid "Activate daily action"
-msgstr "Activer les actions journaliers"
-
-#: quickStatAdminParticipationAndStat.php:1848
-msgid "This allow to activate daily action by survey"
-msgstr ""
-
-#: quickStatAdminParticipationAndStat.php:1860
-msgid "Participation"
-msgstr "Participation"
-
-#: quickStatAdminParticipationAndStat.php:1861
-msgid "Satisfaction"
-msgstr "Satisfaction"
-
-#: quickStatAdminParticipationAndStat.php:1862
-msgid "Administration"
-msgstr "Administration"
-
-#: quickStatAdminParticipationAndStat.php:1864
-msgid "Export"
-msgstr "Export"
-
-#: quickStatAdminParticipationAndStat.php:1865
-msgid "Daily participation"
-msgstr "Participation journalière"
-
-#: quickStatAdminParticipationAndStat.php:1866
-msgid "Daily participation (cumulative)"
-msgstr "Participation journalière (cumulative)"
-
-#: quickStatAdminParticipationAndStat.php:1867
-msgid "Number of connections"
-msgstr "Nombre de connexions"
-
-#: quickStatAdminParticipationAndStat.php:1868
-msgid "Daily participation rate"
-msgstr "Taux de participation journalière"
-
-#: quickStatAdminParticipationAndStat.php:1869
-msgid "Expected participants"
-msgstr "Participants attendus"
-
-#: quickStatAdminParticipationAndStat.php:1870
-msgid "Invitation sent"
-msgstr "Invitations envoyés"
-
-#: quickStatAdminParticipationAndStat.php:1871
+#: quickStatAdminParticipationAndStat.php:926
+#: quickStatAdminParticipationAndStat.php:1231
+#: quickStatAdminParticipationAndStat.php:1903
 msgid "Responses"
 msgstr "Réponses"
 
-#: quickStatAdminParticipationAndStat.php:1872
+#: quickStatAdminParticipationAndStat.php:930
+#: quickStatAdminParticipationAndStat.php:1216
+msgid "Total Responses"
+msgstr "Réponses totales"
+
+#: quickStatAdminParticipationAndStat.php:1481
+msgid "Nb"
+msgstr "Nb"
+
+#: quickStatAdminParticipationAndStat.php:1868
+msgid "The link to the statistics is:"
+msgstr ""
+
+#: quickStatAdminParticipationAndStat.php:1871
+msgid "Activate daily participation"
+msgstr "Activer la participation journalière"
+
+#: quickStatAdminParticipationAndStat.php:1874
+msgid "This allow to activate daily participation by survey"
+msgstr ""
+
+#: quickStatAdminParticipationAndStat.php:1877
+msgid "Activate daily action"
+msgstr "Activer les actions journaliers"
+
+#: quickStatAdminParticipationAndStat.php:1880
+msgid "This allow to activate daily action by survey"
+msgstr ""
+
+#: quickStatAdminParticipationAndStat.php:1892
+msgid "Participation"
+msgstr "Participation"
+
+#: quickStatAdminParticipationAndStat.php:1893
+msgid "Satisfaction"
+msgstr "Satisfaction"
+
+#: quickStatAdminParticipationAndStat.php:1894
+msgid "Administration"
+msgstr "Administration"
+
+#: quickStatAdminParticipationAndStat.php:1895
+msgid "Population"
+msgstr "Population"
+
+#: quickStatAdminParticipationAndStat.php:1896
+msgid "Export"
+msgstr "Export"
+
+#: quickStatAdminParticipationAndStat.php:1897
+msgid "Daily participation"
+msgstr "Participation journalière"
+
+#: quickStatAdminParticipationAndStat.php:1898
+msgid "Daily participation (cumulative)"
+msgstr "Participation journalière (cumulative)"
+
+#: quickStatAdminParticipationAndStat.php:1899
+msgid "Number of connections"
+msgstr "Nombre de connexions"
+
+#: quickStatAdminParticipationAndStat.php:1900
+msgid "Daily participation rate"
+msgstr "Taux de participation journalière"
+
+#: quickStatAdminParticipationAndStat.php:1901
+msgid "Expected participants"
+msgstr "Participants attendus"
+
+#: quickStatAdminParticipationAndStat.php:1902
+msgid "Invitation sent"
+msgstr "Invitations envoyés"
+
+#: quickStatAdminParticipationAndStat.php:1904
 msgid "Participation rate"
 msgstr "Taux de participation"
+
+#: quickStatAdminParticipationAndStat.php:1905
+msgid "Total"
+msgstr ""
+
+#~ msgid "Total Population"
+#~ msgstr "Population totale"

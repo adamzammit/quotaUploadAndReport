@@ -34,13 +34,6 @@
                 'footer' => '<strong>' . $language["Total"] . '</strong>',
             ),
             array(
-                'name' => 'responsesCount',
-                'sortable' => true,
-                'header' => $language["Responses"],
-                'value' => '$data["responsesCount"]',
-                'footer' => '<strong>' . $aFooter['responsesCount'] . '</strong>',
-            ),
-            array(
                 'name' => 'tokensCount',
                 'sortable' => true,
                 'header' => $language["Expected participants"],
@@ -48,7 +41,14 @@
                 'footer' => '<strong>' . $aFooter['tokensCount'] . '</strong>',
             ),
             array(
-                'name' => 'tokensCount',
+                'name' => 'responsesCount',
+                'sortable' => true,
+                'header' => $language["Responses"],
+                'value' => '$data["responsesCount"]',
+                'footer' => '<strong>' . $aFooter['responsesCount'] . '</strong>',
+            ),
+            array(
+                'name' => 'tokensCountRate',
                 'sortable' => true,
                 'header' => $language["Participation rate"],
                 'value' => '($data["rateCount"] ? round($data["rateCount"] * 100, 0) . "%" : "/");',

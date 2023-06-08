@@ -923,11 +923,11 @@ class quickStatAdminParticipationAndStat extends PluginBase
             $source = 'estimate';
         }
         $aResponses["total"] = [
-            "title" => $this->translate("Population"),
+            "title" => $this->translate("Responses"),
             "max" => $max,
             "data" => [
                 [
-                    "title" => $this->translate("Total Population"),
+                    "title" => $this->translate("Total Responses"),
                     "max" => $max,
                     "completed" => Response::model($iSurveyId)->count(
                         "submitdate IS NOT NULL"
@@ -1213,7 +1213,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
                             "datas" => [
                                 [
                                     "title" => $this->translate(
-                                        "Total Population"
+                                        "Total Responses"
                                     ),
                                     "count" => $iCount,
                                     "average" => $this->getAverage(
@@ -1228,7 +1228,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
         }
         if (!empty($aData)) {
             $aResponses["total"] = [
-                "title" => $this->translate("Population"),
+                "title" => $this->translate("Responses"),
                 "aSatisfactions" => $aData,
                 'type' => 'graph'
             ];
@@ -1525,9 +1525,9 @@ class quickStatAdminParticipationAndStat extends PluginBase
         $aStatSurveys = $this->getSurveyList();
         $aFinalSurveys = [];
         $aFooter = [
-            'responsesTotal' => 0,
-            'responsesCount' => 0,
-            'tokensCount' => 0,
+            'responsesTotal' => 0, // Total
+            'responsesCount' => 0, // Submitted
+            'tokensCount' => 0, // Tokens or atented
             'responsesTokenTotal' => 0,
             'responsesTokenCount' => 0,
             'rateTotal' => "",
@@ -1554,25 +1554,28 @@ class quickStatAdminParticipationAndStat extends PluginBase
                     0
                 );
             }
-            $aFooter['tokensCount'] += $aStatSurvey["tokensCount"];
+            
             if ($aStatSurvey["tokensCount"] > 0) {
                 $aStatSurvey["rateTotal"] = $aStatSurvey["responsesTotal"]/$aStatSurvey["tokensCount"];
                 $aStatSurvey["rateCount"] = $aStatSurvey["responsesCount"]/$aStatSurvey["tokensCount"];
-                $aFooter['responsesTokenTotal'] += $aStatSurvey["responsesTotal"];
-                $aFooter['responsesTokenCount'] += $aStatSurvey["responsesCount"];
+
             } else {
                 $aStatSurvey["rateTotal"] = "";
                 $aStatSurvey["rateCount"] = "";
             }
             if (intval($aStatSurvey["responsesCount"]) > 0) {
                 $aFinalSurveys[] = $aStatSurvey;
+                $aFooter['tokensCount'] += $aStatSurvey["tokensCount"];
+                if ($aStatSurvey["tokensCount"] > 0) {
+                    $aFooter['responsesTokenTotal'] += $aStatSurvey["responsesTotal"];
+                    $aFooter['responsesTokenCount'] += $aStatSurvey["responsesCount"];
+                }
             }
+
         }
-        if ($aFooter['responsesTokenTotal'] > 0) {
-            $aFooter["rateTotal"] = $aFooter["responsesTotal"]/$aFooter["responsesTokenTotal"];
-        }
-        if ($aFooter['responsesTokenCount'] > 0) {
-            $aFooter["rateCount"] = $aFooter["responsesCount"]/$aFooter["responsesTokenCount"];
+        if ($aFooter['tokensCount'] > 0) {
+            $aFooter["rateTotal"] = $aFooter["responsesTotal"]/$aFooter["tokensCount"];
+            $aFooter["rateCount"] = $aFooter["responsesCount"]/$aFooter["tokensCount"];
         }
         $this->aRenderData["aSurveys"] = $aFinalSurveys;
         $this->aRenderData["surveysGrid"] = $this->renderPartial(
