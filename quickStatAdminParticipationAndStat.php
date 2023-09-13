@@ -907,7 +907,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
             $oSurvey->sid,
             ""
         );
-        $this->render("participation");
+        $this->ownRender("participation");
     }
     protected function getParticipationRate($iSurveyId)
     {
@@ -1452,7 +1452,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
             $oSurvey->sid,
             ""
         );
-        $this->render("satisfaction");
+        $this->ownRender("satisfaction");
     }
     /**
      * Export in CSV the fayly response rate
@@ -1588,7 +1588,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
             ],
             true
         );
-        $this->render("list_surveys");
+        $this->ownRender("list_surveys");
     }
     /**
      * Test if have only statistics access
@@ -1621,7 +1621,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
      * @param string $type : the statitistics type, file to render (in views/subviews)
      * @return void
      */
-    private function render($type)
+    private function ownRender($type)
     {
         Yii::setPathOfAlias(
             "quickStatAdminParticipationAndStat",
