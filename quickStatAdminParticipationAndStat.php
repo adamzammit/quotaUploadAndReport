@@ -7,7 +7,7 @@
  * @copyright 2016-2023 Denis Chenu <https://www.sondages.pro>
  * @copyright 2016-2023 Advantage <http://www.advantage.fr>
  * @license AGPL v3
- * @version 5.0.0
+ * @version 5.0.1
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -431,10 +431,10 @@ class quickStatAdminParticipationAndStat extends PluginBase
                 case "A":
                 case "B":
                     $oSubQuestions = Question::model()->with("questionl10ns")->findAll([
-                        "condition" => "qid=:qid AND language=:language",
+                        "condition" => "parent_qid = :parent_qid AND language=:language",
                         "order" => "question_order",
                         "params" => [
-                            ":qid" => $oQuestion->qid,
+                            ":parent_qid" => $oQuestion->qid,
                             ":language" => $lang,
                         ],
                     ]);
@@ -1554,11 +1554,9 @@ class quickStatAdminParticipationAndStat extends PluginBase
                     0
                 );
             }
-            
             if ($aStatSurvey["tokensCount"] > 0) {
-                $aStatSurvey["rateTotal"] = $aStatSurvey["responsesTotal"]/$aStatSurvey["tokensCount"];
-                $aStatSurvey["rateCount"] = $aStatSurvey["responsesCount"]/$aStatSurvey["tokensCount"];
-
+                $aStatSurvey["rateTotal"] = $aStatSurvey["responsesTotal"] / $aStatSurvey["tokensCount"];
+                $aStatSurvey["rateCount"] = $aStatSurvey["responsesCount"] / $aStatSurvey["tokensCount"];
             } else {
                 $aStatSurvey["rateTotal"] = "";
                 $aStatSurvey["rateCount"] = "";
@@ -1571,11 +1569,10 @@ class quickStatAdminParticipationAndStat extends PluginBase
                     $aFooter['responsesTokenCount'] += $aStatSurvey["responsesCount"];
                 }
             }
-
         }
         if ($aFooter['tokensCount'] > 0) {
-            $aFooter["rateTotal"] = $aFooter["responsesTotal"]/$aFooter["tokensCount"];
-            $aFooter["rateCount"] = $aFooter["responsesCount"]/$aFooter["tokensCount"];
+            $aFooter["rateTotal"] = $aFooter["responsesTotal"] / $aFooter["tokensCount"];
+            $aFooter["rateCount"] = $aFooter["responsesCount"] / $aFooter["tokensCount"];
         }
         $this->aRenderData["aSurveys"] = $aFinalSurveys;
         $this->aRenderData["surveysGrid"] = $this->renderPartial(
@@ -1807,8 +1804,8 @@ class quickStatAdminParticipationAndStat extends PluginBase
         $oCriteria = new CdbCriteria();
         $oCriteria->select = ['sid', 'active', 'language'];
         $oCriteria->with = ['languagesettings' => [
-                'select'=>'surveyls_title',
-                'where'=>'t.language = languagesettings.language'
+                'select' => 'surveyls_title',
+                'where' => 't.language = languagesettings.language'
             ]
         ];
         $oCriteria->params[":active"] = "Y";
