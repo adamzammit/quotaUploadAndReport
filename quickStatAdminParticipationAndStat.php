@@ -7,7 +7,7 @@
  * @copyright 2016-2023 Denis Chenu <https://www.sondages.pro>
  * @copyright 2016-2023 Advantage <http://www.advantage.fr>
  * @license AGPL v3
- * @version 5.0.1
+ * @version 5.1.0
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -25,6 +25,12 @@ class quickStatAdminParticipationAndStat extends PluginBase
     protected $storage = "DbStorage";
     protected static $description = "Show some specific statitics to your admin user.";
     protected static $name = "quickStatAdminParticipationAndStat";
+
+    /** @inheritdoc, this plugin allow this public method */
+    public $allowedPublicMethods = array(
+        'actionSettings',
+        'actionSaveSettings',
+    );
     /**
      * @var string[] : this answer (label) must be moved at end
      * @todo : move this to settings
@@ -67,11 +73,12 @@ class quickStatAdminParticipationAndStat extends PluginBase
         if (version_compare(App()->getConfig("versionnumber"), "4", "<")) {
             return;
         }
+        $this->subscribe('beforeToolsMenuRender');
 
         //~ $this->subscribe('afterSuccessfulLogin');
         /* Survey settings */
         $this->subscribe("beforeSurveySettings");
-        $this->subscribe("newSurveySettings");
+        // $this->subscribe("newSurveySettings");
         /* Show page */
         $this->subscribe("newDirectRequest");
         /* Broken register
@@ -79,24 +86,132 @@ class quickStatAdminParticipationAndStat extends PluginBase
         */
     }
 
-    /** The settings **/
+    /**
+     * Add the link to setçings in plugin settings
+     */
     public function beforeSurveySettings()
     {
         if (!$this->getEvent()) {
             throw new CHttpException(403);
         }
-        $oEvent = $this->event;
+        /* @Todo move this to own page */
+        $surveyId = $this->getEvent()->get('survey');
+        $settings = [];
+        if (Permission::model()->hasSurveyPermission($surveyId, 'statistics', 'read')) {
+            $accesUrl = App()->createUrl("plugins/direct", [
+                "plugin" => $this->getName(),
+                "function" => "stat",
+                "sid" => $surveyId,
+            ]);
+            if (tableExists("{{survey_{$surveyId}}}")) {
+                $settings["statlink"] = [
+                    "type" => "info",
+                    'content' => CHtml::link($this->translate("Link to statitics"), $accesUrl, array("target" => '_blank','class' => 'btn btn-block btn-default btn-lg')),
+                ];
+            }
+        }
+        if (Permission::model()->hasSurveyPermission($surveyId, 'surveysettings', 'read')) {
+            $managementUrl = Yii::app()->createUrl(
+                'admin/pluginhelper',
+                array(
+                    'sa' => 'sidebody',
+                    'plugin' => get_class($this),
+                    'method' => 'actionSettings',
+                    'surveyId' => $surveyId
+                )
+            );
+            $settings["management"] = [
+                "type" => "info",
+                'content' => CHtml::link($this->translate("Manage statistics"), $managementUrl, array('class' => 'btn btn-block btn-default btn-lg')),
+            ];
+        }
+        if(empty($settings)) {
+            return;
+        }
+        $this->getEvent()->set("surveysettings.{$this->id}", array(
+            'name' => get_class($this),
+            'settings' => $settings
+        ));      
+    }
+
+    /**
+     * see beforeToolsMenuRender event
+     * @deprecated ? See https://bugs.limesurvey.org/view.php?id=15476
+     * @return void
+     */
+    public function beforeToolsMenuRender()
+    {
+        $event = $this->getEvent();
+        $surveyId = $event->get('surveyId');
+        if (!Permission::model()->hasSurveyPermission($surveyId, 'surveysettings', 'read')) {
+            return;
+        }
+        if (!Permission::model()->hasSurveyPermission($surveyId, 'surveycontent', 'read')) {
+            return;
+        }
+        $aMenuItem = array(
+            'label' => $this->translate('Quick statistics'),
+            'iconClass' => 'fa fa-bar-chart',
+            'href' => Yii::app()->createUrl(
+                'admin/pluginhelper',
+                array(
+                    'sa' => 'sidebody',
+                    'plugin' => get_class($this),
+                    'method' => 'actionSettings',
+                    'surveyId' => $surveyId
+                )
+            ),
+        );
+        $menuItem = new \LimeSurvey\Menu\MenuItem($aMenuItem);
+        $event->append('menuItems', array($menuItem));
+    }
+    /** The settings on own page */
+    public function actionSettings($surveyId)
+    {
+        $oSurvey = Survey::model()->findByPk($surveyId);
+        if (!$oSurvey) {
+            throw new CHttpException(404, gT("This survey does not seem to exist."));
+        }
+        if (!Permission::model()->hasSurveyPermission($oSurvey->sid, 'surveysettings', 'read')) {
+            throw new CHttpException(403);
+        }
+        if (!Permission::model()->hasSurveyPermission($oSurvey->sid, 'surveycontent', 'read')) {
+            throw new CHttpException(403);
+        }
+        /* Basic data */
+        $aData = array(
+            'pluginClass' => get_class($this),
+            'surveyId' => $surveyId,
+        );
+        /* Lang */
+        $aData['lang'] = array(
+            'Close' => $this->translate("Close"),
+            'Quick statistics settings' => $this->translate("Quick statistics settings"),
+        );
+
+        $aData['aSettings'] = $this->getSettings($oSurvey->sid);
+        $aData['updatepermission'] = Permission::model()->hasSurveyPermission($surveyId, 'surveysettings', 'update');
+        $aData['form'] = array(
+            'action' => App()->createUrl('admin/pluginhelper/sa/sidebody', array('plugin' => get_class($this),'method' => 'actionSaveSettings','surveyId' => $surveyId)),
+            'close' => App()->createUrl('surveyAdministration/view', array('surveyid' => $surveyId))
+        );
+        return $this->renderPartial('admin.settings', $aData, true);
+    }
+
+    /** The settings **/
+    private function getSettings($surveyId)
+    {
         $aSettings = [];
-        $oSurvey = Survey::model()->findByPk($oEvent->get("survey"));
+        $oSurvey = Survey::model()->findByPk($surveyId);
         /* var string language to be used */
         $lang = $oSurvey->language;
         $aSettings = [];
         $url = App()->createUrl("plugins/direct", [
             "plugin" => $this->getName(),
             "function" => "stat",
-            "sid" => $oEvent->get("survey"),
+            "sid" => $surveyId,
         ]);
-        if (tableExists("{{survey_{$oSurvey->sid}}}")) {
+        if (tableExists("{{survey_{$surveyId}}}")) {
             $aSettings["statlink"] = [
                 "type" => "info",
                 "content" =>
@@ -121,7 +236,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
             "current" => $this->get(
                 "alternateTitle",
                 "Survey",
-                $oEvent->get("survey"),
+                $surveyId,
                 ""
             ),
         ];
@@ -135,7 +250,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
             "current" => $this->get(
                 "numberMax",
                 "Survey",
-                $oEvent->get("survey"),
+                $surveyId,
                 0
             ),
         ];
@@ -155,7 +270,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
                 "current" => $this->get(
                     "participationComment",
                     "Survey",
-                    $oEvent->get("survey"),
+                    $surveyId,
                     ""
                 ),
                 "height" => "8em",
@@ -170,7 +285,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
                 "current" => $this->get(
                     "dailyRate",
                     "Survey",
-                    $oEvent->get("survey"),
+                    $surveyId,
                     1
                 ),
             ];
@@ -183,7 +298,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
                 "current" => $this->get(
                     "dailyRateCumulative",
                     "Survey",
-                    $oEvent->get("survey"),
+                    $surveyId,
                     0
                 ),
             ];
@@ -204,7 +319,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
                     "current" => $this->get(
                         "dailyRateEnter",
                         "Survey",
-                        $oEvent->get("survey"),
+                        $surveyId,
                         0
                     ),
                 ];
@@ -226,7 +341,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
                     "current" => $this->get(
                         "dailyRateAction",
                         "Survey",
-                        $oEvent->get("survey"),
+                        $surveyId,
                         0
                     ),
                 ];
@@ -240,10 +355,10 @@ class quickStatAdminParticipationAndStat extends PluginBase
             ];
         }
         /* Token attribute */
-        if (tableExists("{{tokens_{$oEvent->get("survey")}}}")) {
+        if (tableExists("{{tokens_{$surveyId}}}")) {
             $aRealTokenAttributes = array_keys(
                 Yii::app()->db->schema->getTable(
-                    "{{tokens_{$oEvent->get("survey")}}}"
+                    "{{tokens_{$surveyId}}}"
                 )->columns
             );
             $aRealTokenAttributes = array_combine(
@@ -251,7 +366,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
                 $aRealTokenAttributes
             );
             $aTokenAttributes = array_filter(
-                Token::model($oEvent->get("survey"))->attributeLabels()
+                Token::model($surveyId)->attributeLabels()
             );
             $aTokenAttributes = array_diff_key(
                 array_replace($aRealTokenAttributes, $aTokenAttributes),
@@ -294,7 +409,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
                     "current" => $this->get(
                         "tokenAttributes",
                         "Survey",
-                        $oEvent->get("survey")
+                        $surveyId
                     ),
                 ];
             }
@@ -336,7 +451,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
                 "current" => $this->get(
                     "questionCross",
                     "Survey",
-                    $oEvent->get("survey")
+                    $surveyId
                 ),
             ];
         }
@@ -569,7 +684,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
                 "current" => $this->get(
                     "satisfactionComment",
                     "Survey",
-                    $oEvent->get("survey"),
+                    $surveyId,
                     ""
                 ),
                 "height" => "8em",
@@ -583,7 +698,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
                 "current" => $this->get(
                     "questionNumeric",
                     "Survey",
-                    $oEvent->get("survey")
+                    $surveyId
                 ),
             ];
             if (!empty($aTokenAttributes)) {
@@ -603,7 +718,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
                     "current" => $this->get(
                         "tokenAttributesSatisfaction",
                         "Survey",
-                        $oEvent->get("survey")
+                        $surveyId
                     ),
                 ];
                 $aSettings["tokenAttributesSatisfactionTable"] = [
@@ -616,7 +731,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
                     "current" => $this->get(
                         "tokenAttributesSatisfactionTable",
                         "Survey",
-                        $oEvent->get("survey")
+                        $surveyId
                     ),
                 ];
             }
@@ -646,7 +761,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
                     "current" => $this->get(
                         "questionCrossSatisfaction",
                         "Survey",
-                        $oEvent->get("survey")
+                        $surveyId
                     ),
                 ];
                 $aSettings["questionCrossSatisfactionTable"] = [
@@ -674,25 +789,27 @@ class quickStatAdminParticipationAndStat extends PluginBase
                     "current" => $this->get(
                         "questionCrossSatisfactionTable",
                         "Survey",
-                        $oEvent->get("survey")
+                        $surveyId
                     ),
                 ];
             }
         }
-        $oEvent->set("surveysettings.{$this->id}", [
-            "name" => get_class($this),
-            "settings" => $aSettings,
-        ]);
+        return [
+            $this->translate('Settings') => $aSettings
+        ];
     }
 
     /** Save the settings **/
-    public function newSurveySettings()
+    public function actionSaveSettings($surveyId)
     {
-        if (!$this->getEvent()) {
+        $oSurvey = Survey::model()->findByPk($surveyId);
+        if (!$oSurvey) {
+            throw new CHttpException(404, gT("This survey does not seem to exist."));
+        }
+        if (!Permission::model()->hasSurveyPermission($oSurvey->sid, 'surveysettings', 'update')) {
             throw new CHttpException(403);
         }
-        $event = $this->event;
-        $aSettings = $event->get("settings");
+        $aSettings = App()->getRequest()->getPost('quickStatAdminParticipationAndStat');
         /* Fix not set dropdown */
         $aSettings["tokenAttributes"] = isset($aSettings["tokenAttributes"])
             ? $aSettings["tokenAttributes"]
@@ -725,7 +842,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
             : null;
         foreach ($aSettings as $name => $value) {
             /* In order use survey setting, if not set, use global, if not set use default */
-            $default = $event->get(
+            $default = $this->get(
                 $name,
                 null,
                 null,
@@ -737,10 +854,12 @@ class quickStatAdminParticipationAndStat extends PluginBase
                 $name,
                 $value,
                 "Survey",
-                $event->get("survey"),
+                $surveyId,
                 $default
             );
         }
+        $redirectUrl = Yii::app()->createUrl('admin/pluginhelper/sa/sidebody', array('plugin' => get_class($this),'method' => 'actionSettings','surveyId' => $surveyId));
+        Yii::app()->getRequest()->redirect($redirectUrl, true, 303);
     }
 
     /**
@@ -1637,7 +1756,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
         $this->aRenderData["subview"] = "subviews.{$type}";
         $this->aRenderData["type"] = $type;
         $this->aRenderData["surveyList"] = $this->getSurveyList();
-        $this->aRenderData["showSatisfaction"] = count(
+        $this->aRenderData["showSatisfaction"] = !empty(
             $this->get("questionNumeric", "Survey", $this->iSurveyId, [])
         );
         $this->aRenderData["showAdminSurvey"] =
