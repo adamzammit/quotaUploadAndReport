@@ -7,7 +7,7 @@
  * @copyright 2016-2023 Denis Chenu <https://www.sondages.pro>
  * @copyright 2016-2023 Advantage <http://www.advantage.fr>
  * @license AGPL v3
- * @version 5.1.0
+ * @version 5.2.0
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -125,13 +125,13 @@ class quickStatAdminParticipationAndStat extends PluginBase
                 'content' => CHtml::link($this->translate("Manage statistics"), $managementUrl, array('class' => 'btn btn-block btn-default btn-lg')),
             ];
         }
-        if(empty($settings)) {
+        if (empty($settings)) {
             return;
         }
         $this->getEvent()->set("surveysettings.{$this->id}", array(
             'name' => get_class($this),
             'settings' => $settings
-        ));      
+        ));
     }
 
     /**
@@ -794,6 +794,23 @@ class quickStatAdminParticipationAndStat extends PluginBase
                 ];
             }
         }
+        $aSettings["IndexTitle"] = [
+            "type" => "info",
+            "content" =>
+                "<h5 class='alert alert-info'>" .
+                $this->translate("Create index in database") .
+                "</h5>",
+        ];
+        $aSettings["indexToken"] = [
+            "type" => "boolean",
+            "label" => $this->translate("Create index on token table"),
+            "current" => 0,
+        ];
+        $aSettings["indexResponse"] = [
+            "type" => "boolean",
+            "label" => $this->translate("Create index on response table"),
+            "current" => 0,
+        ];
         return [
             $this->translate('Settings') => $aSettings
         ];
@@ -840,6 +857,12 @@ class quickStatAdminParticipationAndStat extends PluginBase
         )
             ? $aSettings["questionCrossSatisfactionTable"]
             : null;
+        /* Keep value but remove from save */
+        $indexToken = $aSettings['indexToken'];
+        $indexResponse = $aSettings['indexResponse'];
+        unset($aSettings['indexToken']);
+        unset($aSettings['indexResponse']);
+
         foreach ($aSettings as $name => $value) {
             /* In order use survey setting, if not set, use global, if not set use default */
             $default = $this->get(
@@ -858,8 +881,109 @@ class quickStatAdminParticipationAndStat extends PluginBase
                 $default
             );
         }
+        /* Index */
+        if ($indexToken) {
+            $this->createTokenIndex($surveyId);
+        }
+        if ($indexResponse) {
+            $this->createResponseIndex($surveyId);
+        }
         $redirectUrl = Yii::app()->createUrl('admin/pluginhelper/sa/sidebody', array('plugin' => get_class($this),'method' => 'actionSettings','surveyId' => $surveyId));
         Yii::app()->getRequest()->redirect($redirectUrl, true, 303);
+    }
+
+    /**
+     * Create needed index on token table
+     * @param integer $surveyId
+     * @return void
+     */
+    private function createTokenIndex($surveyId)
+    {
+        if (!tableExists("{{tokens_{$surveyId}}}")) {
+            /* @todo flash message*/
+            return;
+        }
+        $allTokenAttributes = array_unique(array_merge(
+            (array) $this->get("tokenAttributes", "Survey", $surveyId),
+            (array) $this->get("tokenAttributesSatisfaction", "Survey", $surveyId),
+            (array) $this->get("tokenAttributesSatisfactionTable", "Survey", $surveyId)
+        ));
+        $aRealTokenAttributes = array_keys(
+            Yii::app()->db->schema->getTable(
+                "{{tokens_{$surveyId}}}"
+            )->columns
+        );
+        foreach ($allTokenAttributes as $attribute) {
+            if (in_array($attribute, $aRealTokenAttributes)) {
+                $indexName = "qickstat_" . $attribute;
+                try {
+                    App()->getDb()->createCommand()->dropIndex($indexName, "{{tokens_{$surveyId}}}");
+                } catch (Exception $ex) {
+                    // index not exist : not an error
+                }
+                if (App()->getDb()->createCommand()->createIndex($indexName, "{{tokens_{$surveyId}}}", $attribute)) {
+                    App()->setFlashMessage(
+                        sprintf($this->gT("Index created on attribute %s token table."), $attribute),
+                        "success"
+                    );
+                } else {
+                    App()->setFlashMessage(
+                        sprintf($this->gT("Unblae to create index on attribute %s token table."), $attribute),
+                        "warnnng"
+                    );
+                }
+            }
+        }
+    }
+
+    /**
+     * Create needed index on response table
+     * @param integer $surveyId
+     * @return void
+     */
+    private function createResponseIndex($surveyId)
+    {
+        if (!tableExists("{{survey_{$surveyId}}}")) {
+            /* @todo flash message*/
+            return;
+        }
+        $allQuestionsIds = array_unique(array_merge(
+            (array) $this->get("questionCross", "Survey", $surveyId),
+            (array) $this->get("questionCrossSatisfaction", "Survey", $surveyId),
+            (array) $this->get("questionCrossSatisfactionTable", "Survey", $surveyId)
+        ));
+        $aRealReponseAttributes = array_keys(
+            Yii::app()->db->schema->getTable(
+                "{{survey_{$surveyId}}}"
+            )->columns
+        );
+
+        foreach ($allQuestionsIds as $qid) {
+            $oQuestion = Question::model()->find("qid = :qid", [':qid' => $qid]);
+            if (!$oQuestion) {
+                continue;
+            }
+            $column = $surveyId . "X" . $oQuestion->gid . "X" . $oQuestion->qid;
+            if (in_array($column, $aRealReponseAttributes)) {
+                $indexName = "qickstat_" . $column;
+                try {
+                    App()->getDb()->createCommand()->dropIndex($indexName, "{{survey_{$surveyId}}}");
+                } catch (Exception $ex) {
+                    // index not exist : not an error
+                }
+                if (App()->getDb()->createCommand()->createIndex($indexName, "{{survey_{$surveyId}}}", $column)) {
+                    App()->setFlashMessage(
+                        sprintf($this->gT("Index created on column %s (question %s) response table."), $column, $oQuestion->title),
+                        "success"
+                    );
+                } else {
+                    App()->setFlashMessage(
+                        sprintf($this->gT("Unable to create index on column %s (question %s) response table."), $column, $oQuestion->title),
+                        "warnnng"
+                    );
+                }
+            }
+        }
     }
 
     /**
