@@ -1170,7 +1170,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
             "max" => $max,
             "data" => [
                 [
-                    "title" => $this->translate("Total Responses"),
+                    "title" => $this->translate("Total responses"),
                     "max" => $max,
                     "completed" => Response::model($iSurveyId)->count(
                         "submitdate IS NOT NULL"
@@ -1456,7 +1456,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
                             "datas" => [
                                 [
                                     "title" => $this->translate(
-                                        "Total Responses"
+                                        "Total responses"
                                     ),
                                     "count" => $iCount,
                                     "average" => $this->getAverage(
