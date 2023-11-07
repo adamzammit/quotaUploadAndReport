@@ -7,7 +7,7 @@
  * @copyright 2016-2023 Denis Chenu <https://www.sondages.pro>
  * @copyright 2016-2023 Advantage <http://www.advantage.fr>
  * @license AGPL v3
- * @version 5.2.0
+ * @version 5.2.1
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -1804,7 +1804,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
                 $aStatSurvey["rateTotal"] = "";
                 $aStatSurvey["rateCount"] = "";
             }
-            if (intval($aStatSurvey["responsesCount"]) > 0) {
+            if (intval($aStatSurvey["responsesCount"]) > 0 || $aStatSurvey["tokensCount"] > 0) {
                 $aFinalSurveys[] = $aStatSurvey;
                 $aFooter['tokensCount'] += $aStatSurvey["tokensCount"];
                 if ($aStatSurvey["tokensCount"] > 0) {
@@ -1848,12 +1848,14 @@ class quickStatAdminParticipationAndStat extends PluginBase
             [":uid" => Yii::app()->session["loginID"], ":permission" => "auth%"]
         );
         $countSurveyPermission = Permission::model()->count(
-            "uid=:uid AND permission NOT LIKE :permission AND entity='Survey' AND (create_p > 0 or read_p > 0 or update_p > 0 or delete_p > 0 or import_p > 0 or import_p > 0)",
+            "uid=:uid AND (permission NOT LIKE :permission1 AND permission NOT LIKE :permission2) AND entity='Survey' AND (create_p > 0 or read_p > 0 or update_p > 0 or delete_p > 0 or import_p > 0 or import_p > 0)",
             [
                 ":uid" => Yii::app()->session["loginID"],
-                ":permission" => "statistics",
+                ":permission1" => "statistics",
+                ":permission2" => "survey",
             ]
         );
+
         return !((bool) $countPermission || (bool) $countSurveyPermission);
     }
     /**
@@ -2051,14 +2053,13 @@ class quickStatAdminParticipationAndStat extends PluginBase
                 'where' => 't.language = languagesettings.language'
             ]
         ];
-        $oCriteria->params[":active"] = "Y";
         $oCriteria->condition = "active=:active";
         $oCriteria->params[":active"] = "Y";
         if (!Permission::model()->hasGlobalPermission("surveys", "read")) {
             $oCriteria->addCondition(
                 "sid IN (SELECT entity_id FROM {{permissions}} WHERE entity = :entity AND  uid = :uid AND permission = :permission AND read_p = 1)"
             );
-            $oCriteria->params[":entity"] = "survey";
+            $oCriteria->params[":entity"] = "Survey";
             $oCriteria->params[":uid"] = Yii::app()->user->getId();
             $oCriteria->params[":permission"] = "statistics";
             $oCriteria->compare(

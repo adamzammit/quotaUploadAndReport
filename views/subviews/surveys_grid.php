@@ -16,7 +16,6 @@
         'dataProvider' => $dataProvider,
         'htmlOptions' => ['class' => 'table-responsive grid-view-quickstats'],
         'ajaxUpdate' => true,
-        'rowCssClassExpression' => '$data["responsesCount"]==0?"hidden hide":""',
         'columns' => array(
             array(
                 'name' => 'sid',
