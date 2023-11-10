@@ -244,7 +244,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
             "type" => "int",
             "label" => $this->translate("Expected participation"),
             "help" => $this->translate(
-                "If survey didn't have token : used for participation rate."
+                "Used for participation rate, replace token count value."
             ),
             "htmlOptions" => ["min" => 0],
             "current" => $this->get(
@@ -350,7 +350,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
             $aSettings["dailyRate"] = [
                 "type" => "info",
                 "label" => $this->translate(
-                    "Survey are not date stamped: Le questionnaire n'est pas daté: it's not possible to show daily rates."
+                    "Survey are not date stamped: it's not possible to show daily rates."
                 ),
             ];
         }
@@ -1165,7 +1165,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
             $source = 'token';
         }
         $aResponses["total"] = [
-            "title" => $this->translate("Responses"),
+            "title" => $this->translate("Globally"),
             "max" => $max,
             "data" => [
                 [
@@ -1271,7 +1271,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
                             ),
                         ];
                     }
-                    $aResponses[$sColumn] = [
+                    $aResponses[$oSingleQuestion->title] = [
                         "title" => viewHelper::flatEllipsizeText(
                             $oSingleQuestion->questionl10ns[$this->surveyLanguage]->question,
                             true,
@@ -1470,7 +1470,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
         }
         if (!empty($aData)) {
             $aResponses["total"] = [
-                "title" => $this->translate("Responses"),
+                "title" => $this->translate("Globally"),
                 "aSatisfactions" => $aData,
                 'type' => 'graph'
             ];
@@ -2140,6 +2140,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
             "Expected participants" => $this->translate("Expected participants"),
             "Invitation sent" => $this->translate("Invitation sent"),
             "Responses" => $this->translate("Responses"),
+            "Globally" => $this->translate("Globally"),
             "Participation rate" => $this->translate("Participation rate"),
             'Total' => $this->translate("Total")
         );

@@ -80,8 +80,8 @@
     <h2 class="quickstat-panel-title">{{ lang["Participation rate"] }}</h2>
   </div>
   <div class="panel-body">
-    {% for aResponse in aStatPanel.aResponses %}
-       <table class="quickstat-table quickstat-table-participation table table-bordered table-striped {% if aResponse.max <= 0 %} quickstat-norate{% endif %}">
+    {% for key,aResponse in aStatPanel.aResponses %}
+       <table class="quickstat-table quickstat-table-participation quickstat-table-participation-{{ key }} table table-bordered table-striped {% if aResponse.max <= 0 %} quickstat-norate{% endif %}">
         <colgroup>
           <col class="quickstat-col-answer">
           {% if aResponse.max > 0 %}<col class="quickstat-col-nbsend">{% endif %}

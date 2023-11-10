@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: quickStatAdminParticipationAndStat\n"
-"POT-Creation-Date: 2023-10-18 10:43+0200\n"
+"POT-Creation-Date: 2023-11-10 17:54+0100\n"
 "PO-Revision-Date: 2023-05-30 11:56+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -55,7 +55,7 @@ msgid "Expected participation"
 msgstr ""
 
 #: quickStatAdminParticipationAndStat.php:247
-msgid "If survey didn't have token : used for participation rate."
+msgid "Used for participation rate, replace token count value."
 msgstr ""
 
 #: quickStatAdminParticipationAndStat.php:261
@@ -84,8 +84,7 @@ msgstr ""
 
 #: quickStatAdminParticipationAndStat.php:353
 msgid ""
-"Survey are not date stamped: Le questionnaire n'est pas daté: it's not "
-"possible to show daily rates."
+"Survey are not date stamped: it's not possible to show daily rates."
 msgstr ""
 
 #: quickStatAdminParticipationAndStat.php:405
@@ -140,83 +139,87 @@ msgstr ""
 msgid "Settings"
 msgstr ""
 
-#: quickStatAdminParticipationAndStat.php:1169
-#: quickStatAdminParticipationAndStat.php:1474
+#: quickStatAdminParticipationAndStat.php:1168
+#: quickStatAdminParticipationAndStat.php:1473
 #: quickStatAdminParticipationAndStat.php:2143
-msgid "Responses"
+msgid "Globally"
 msgstr ""
 
-#: quickStatAdminParticipationAndStat.php:1173
-#: quickStatAdminParticipationAndStat.php:1459
+#: quickStatAdminParticipationAndStat.php:1172
+#: quickStatAdminParticipationAndStat.php:1458
 msgid "Total responses"
 msgstr ""
 
-#: quickStatAdminParticipationAndStat.php:1724
+#: quickStatAdminParticipationAndStat.php:1723
 msgid "Nb"
 msgstr ""
 
-#: quickStatAdminParticipationAndStat.php:2108
+#: quickStatAdminParticipationAndStat.php:2107
 msgid "The link to the statistics is:"
 msgstr ""
 
-#: quickStatAdminParticipationAndStat.php:2111
+#: quickStatAdminParticipationAndStat.php:2110
 msgid "Activate daily participation"
 msgstr ""
 
-#: quickStatAdminParticipationAndStat.php:2114
+#: quickStatAdminParticipationAndStat.php:2113
 msgid "This allow to activate daily participation by survey"
 msgstr ""
 
-#: quickStatAdminParticipationAndStat.php:2117
+#: quickStatAdminParticipationAndStat.php:2116
 msgid "Activate daily action"
 msgstr ""
 
-#: quickStatAdminParticipationAndStat.php:2120
+#: quickStatAdminParticipationAndStat.php:2119
 msgid "This allow to activate daily action by survey"
 msgstr ""
 
-#: quickStatAdminParticipationAndStat.php:2132
+#: quickStatAdminParticipationAndStat.php:2131
 msgid "Participation"
 msgstr ""
 
-#: quickStatAdminParticipationAndStat.php:2133
+#: quickStatAdminParticipationAndStat.php:2132
 msgid "Satisfaction"
 msgstr ""
 
-#: quickStatAdminParticipationAndStat.php:2134
+#: quickStatAdminParticipationAndStat.php:2133
 msgid "Administration"
 msgstr ""
 
-#: quickStatAdminParticipationAndStat.php:2135
+#: quickStatAdminParticipationAndStat.php:2134
 msgid "Population"
 msgstr ""
 
-#: quickStatAdminParticipationAndStat.php:2136
+#: quickStatAdminParticipationAndStat.php:2135
 msgid "Export"
 msgstr ""
 
-#: quickStatAdminParticipationAndStat.php:2137
+#: quickStatAdminParticipationAndStat.php:2136
 msgid "Daily participation"
 msgstr ""
 
-#: quickStatAdminParticipationAndStat.php:2138
+#: quickStatAdminParticipationAndStat.php:2137
 msgid "Daily participation (cumulative)"
 msgstr ""
 
-#: quickStatAdminParticipationAndStat.php:2139
+#: quickStatAdminParticipationAndStat.php:2138
 msgid "Number of connections"
 msgstr ""
 
-#: quickStatAdminParticipationAndStat.php:2140
+#: quickStatAdminParticipationAndStat.php:2139
 msgid "Daily participation rate"
 msgstr ""
 
-#: quickStatAdminParticipationAndStat.php:2141
+#: quickStatAdminParticipationAndStat.php:2140
 msgid "Expected participants"
 msgstr ""
 
-#: quickStatAdminParticipationAndStat.php:2142
+#: quickStatAdminParticipationAndStat.php:2141
 msgid "Invitation sent"
+msgstr ""
+
+#: quickStatAdminParticipationAndStat.php:2142
+msgid "Responses"
 msgstr ""
 
 #: quickStatAdminParticipationAndStat.php:2144
