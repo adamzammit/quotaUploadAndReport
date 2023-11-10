@@ -1158,12 +1158,11 @@ class quickStatAdminParticipationAndStat extends PluginBase
         /* decompte */
         $aResponses = [];
         /* Total */
-        if (tableExists("{{tokens_{$iSurveyId}}}")) {
+        $max = $this->get("numberMax", "Survey", $iSurveyId, 0);
+        $source = 'estimate';
+        if (intval($max) == 0 && tableExists("{{tokens_{$iSurveyId}}}")) {
             $max = Token::model($iSurveyId)->count(); // see with Token::model($iSurveyId)->empty()->count()
             $source = 'token';
-        } else {
-            $max = $this->get("numberMax", "Survey", $iSurveyId, 0);
-            $source = 'estimate';
         }
         $aResponses["total"] = [
             "title" => $this->translate("Responses"),
@@ -1785,17 +1784,16 @@ class quickStatAdminParticipationAndStat extends PluginBase
                 $aStatSurvey["sid"]
             )->count("submitdate IS NOT NULL");
             $aFooter['responsesCount'] += $aStatSurvey["responsesCount"];
-            if (tableExists("{{tokens_{$aStatSurvey["sid"]}}}")) {
+            $aStatSurvey["tokensCount"] = $this->get(
+                "numberMax",
+                "Survey",
+                $aStatSurvey["sid"],
+                0
+            );
+            if (intval($aStatSurvey["tokensCount"]) == 0 && tableExists("{{tokens_{$aStatSurvey["sid"]}}}")) {
                 $aStatSurvey["tokensCount"] = Token::model(
                     $aStatSurvey["sid"]
                 )->count();
-            } else {
-                $aStatSurvey["tokensCount"] = $this->get(
-                    "numberMax",
-                    "Survey",
-                    $aStatSurvey["sid"],
-                    0
-                );
             }
             if ($aStatSurvey["tokensCount"] > 0) {
                 $aStatSurvey["rateTotal"] = $aStatSurvey["responsesTotal"] / $aStatSurvey["tokensCount"];
