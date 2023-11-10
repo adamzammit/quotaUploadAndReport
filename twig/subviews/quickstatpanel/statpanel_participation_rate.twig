@@ -40,7 +40,6 @@
         {% endif %}
 
        var chartdaily{{ type }}  = $.jqplot('chart-daily{{ type }}', [dailyRate], {
-          //title: 'Sine Data Renderer',
           animate: true,
         seriesDefaults:{
             pointLabels: {
@@ -68,7 +67,7 @@
               max: '{{ maxDate }}',
               tickOptions: {
                   angle: -45,
-                  formatString:'%a %d/%m/%y',
+                  formatString:'{{ aStatPanel.jqplotDateFormat }}',
                   showMinorTicks:false
               },
             },

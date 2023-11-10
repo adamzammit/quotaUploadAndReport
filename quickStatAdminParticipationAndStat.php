@@ -7,7 +7,7 @@
  * @copyright 2016-2023 Denis Chenu <https://www.sondages.pro>
  * @copyright 2016-2023 Advantage <http://www.advantage.fr>
  * @license AGPL v3
- * @version 5.2.1
+ * @version 5.2.2
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -1927,6 +1927,9 @@ class quickStatAdminParticipationAndStat extends PluginBase
             ]
         );
         $twigRenderData["aStatPanel"]["language"] = $this->getRenderLanguageStrings();
+        $languageData = getLanguageDetails(App()->getLanguage());
+        $twigRenderData["aStatPanel"]["jqplotDateFormat"] = $this->getJqplotDateFormat($languageData['dateformat']);
+
         App()->clientScript->registerScriptFile(
             Yii::app()->getConfig("generalscripts") . "nojs.js",
             CClientScript::POS_HEAD
@@ -2351,5 +2354,34 @@ class quickStatAdminParticipationAndStat extends PluginBase
     private function translate($string)
     {
         return $this->gT($string, 'unescaped');
+    }
+
+    /**
+     * getDateformat from number to jqplot formatString
+     * @see surveytranslator_helper/ getDateFormatData
+     * @var integer getLanguageData[lang][dateformat]
+     * @return string
+     **/
+    private function getJqplotDateFormat($iDateFormat)
+    {
+        // see https://web.archive.org/web/20230327045702/http://www.jqplot.com/docs/files/plugins/jqplot-dateAxisRenderer-js.html
+        $aDateFormats = array(
+            1 => '%d.%m.%Y',
+            2 => '%d-%m-%Y',
+            3 => '%Y.%m.%d',
+            4 => '%#d.%#m.%Y',
+            5 => '%d/%m/%Y',
+            6 => '%Y-%m-%d',
+            7 => '%Y/%m/%d',
+            8 => '%#d/%#m/%Y',
+            9 => '%m-%d-%Y',
+            10 => '%m.%d.%Y',
+            11 => '%m/%d/%Y',
+            12 => '%#d-%#m-%Y'
+        );
+        if (isset($aDateFormats[$iDateFormat])) {
+            return $aDateFormats[$iDateFormat];
+        }
+        return $aDateFormats[6];
     }
 }
