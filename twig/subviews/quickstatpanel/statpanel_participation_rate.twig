@@ -1,3 +1,4 @@
+{# @since 5.2.2 : fix processString #}
 <div class="panel panel-primary">
   <div class="panel-heading quickstatpanel-title">
     <h2 class="quickstat-panel-title">{{ title }}</h2>
@@ -33,10 +34,10 @@
         {% set minDate = processString("{date('Y-m-d',strtotime('" ~ minDate ~ " -1 day'))}", 1) %}
         {% set maxDate = processString("{date('Y-m-d',strtotime('" ~ maxDate ~ " +1 day'))}", 1) %}
         {% if(aSurveyInfo.stardate and aSurveyInfo.startdate < maxDate) %}
-          {% set mindate = processString("{date('Y-m-d',strtotime(" ~ aSurveyInfo.stardate ~ "))}", 1) %}
+          {% set mindate = processString("{date('Y-m-d',strtotime('" ~ aSurveyInfo.stardate ~ "'))}", 1) %}
         {% endif %}
         {% if(aSurveyInfo.expires and aSurveyInfo.expires > minDate) %}
-          {% set maxDate = processString("{date('Y-m-d',strtotime(" ~ aSurveyInfo.expires ~ "))}", 1) %}
+          {% set maxDate = processString("{date('Y-m-d',strtotime('" ~ aSurveyInfo.expires ~ "'))}", 1) %}
         {% endif %}
 
        var chartdaily{{ type }}  = $.jqplot('chart-daily{{ type }}', [dailyRate], {
