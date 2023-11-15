@@ -7,7 +7,7 @@
  * @copyright 2016-2023 Denis Chenu <https://www.sondages.pro>
  * @copyright 2016-2023 Advantage <http://www.advantage.fr>
  * @license AGPL v3
- * @version 5.2.2
+ * @version 5.3.0
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -31,6 +31,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
         'actionSettings',
         'actionSaveSettings',
     );
+
     /**
      * @var string[] : this answer (label) must be moved at end
      * @todo : move this to settings
@@ -45,24 +46,32 @@ class quickStatAdminParticipationAndStat extends PluginBase
         "other",
         "other",
     ];
+
     /**
      * @var array : render Data
      */
     private $aRenderData = [];
+
     /**
      * @var string : language for survey
      */
     private $surveyLanguage;
     protected $settings = [
         "docu" => ["type" => "info", "content" => ""],
+        "redirectAfterLogin" => [
+            "type" => "boolean",
+            "label" => "Check if user have only statistics permission after login and redirect to this plugin if yes.",
+            "help" => "Redirection happen if it's not already a plugin in current redirection.",
+            "default" => 1,
+        ],
         "dailyRateEnterAllow" => [
             "type" => "checkbox",
-            "label" => "Activate daily participation",
+            "label" => "Activate daily participation by default",
             "default" => 1,
         ],
         "dailyRateActionAllow" => [
             "type" => "checkbox",
-            "label" => "Activate daily action",
+            "label" => "Activate daily action by default",
             "default" => 0,
         ],
     ];
@@ -75,7 +84,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
         }
         $this->subscribe('beforeToolsMenuRender');
 
-        //~ $this->subscribe('afterSuccessfulLogin');
+        $this->subscribe('afterSuccessfulLogin');
         /* Survey settings */
         $this->subscribe("beforeSurveySettings");
         // $this->subscribe("newSurveySettings");
@@ -1828,6 +1837,25 @@ class quickStatAdminParticipationAndStat extends PluginBase
         );
         $this->ownRender("list_surveys");
     }
+
+    public function afterSuccessfulLogin()
+    {
+        if (!$this->get('redirectAfterLogin', null, null, true)) {
+            return;
+        }
+        if (!$this->onlyStatAccess()) {
+            return;
+        }
+        $route = ltrim("/", Yii::app()->getUrlManager()->parseUrl(App()->user->getReturnUrl()));
+        if (substr( $route, 0, 14 ) !== "plugins/direct") {
+            $url = App()->createUrl("plugins/direct", [
+                "plugin" => $this->getName(),
+                "function" => "list",
+            ]);
+            App()->user->setReturnUrl($url);
+        }
+    }
+
     /**
      * Test if have only statistics access
      * @todo : use a global settings ?
