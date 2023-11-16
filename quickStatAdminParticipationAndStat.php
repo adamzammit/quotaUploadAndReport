@@ -7,7 +7,7 @@
  * @copyright 2016-2023 Denis Chenu <https://www.sondages.pro>
  * @copyright 2016-2023 Advantage <http://www.advantage.fr>
  * @license AGPL v3
- * @version 5.3.0
+ * @version 5.3.1
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -75,6 +75,9 @@ class quickStatAdminParticipationAndStat extends PluginBase
             "default" => 0,
         ],
     ];
+
+    /** private boolean isOwnRedit*/
+    private $isCurrentUrl = false;
 
     /** @inheritdoc **/
     public function init()
@@ -1008,6 +1011,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
             return;
         }
         if (Yii::app()->user->getIsGuest()) {
+            $this->isCurrentUrl = true;
             App()->user->setReturnUrl(App()->request->requestUri);
             App()->controller->redirect(["/admin/authentication"]);
         }
@@ -1846,8 +1850,12 @@ class quickStatAdminParticipationAndStat extends PluginBase
         if (!$this->onlyStatAccess()) {
             return;
         }
-        $route = ltrim("/", Yii::app()->getUrlManager()->parseUrl(App()->user->getReturnUrl()));
-        if (substr( $route, 0, 14 ) !== "plugins/direct") {
+        if ($this->isCurrentUrl) {
+            return;
+        }
+        $returnUrl = App()->user->getReturnUrl();
+        $pluginUrl = App()->createUrl("plugins/direct");
+        if (empty($returnUrl) || substr($returnUrl, 0, strlen($pluginUrl)) !== $pluginUrl) {
             $url = App()->createUrl("plugins/direct", [
                 "plugin" => $this->getName(),
                 "function" => "list",
