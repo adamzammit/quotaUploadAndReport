@@ -1,0 +1,20 @@
+<li class="{{ aSurveyInfo.class.indexmenugli }} dropdown">
+    <a class="{{ aSurveyInfo.class.indexmenuglia }} dropdown-toggle" {{ aSurveyInfo.attr.indexmenuglia }} href="#" >
+        {{ aStatPanel.userName }}
+        <span class="{{ aSurveyInfo.class.indexmenugspan }} caret" {{ aSurveyInfo.attr.indexmenugspan }}></span>
+    </a>
+    <ul class="{{ aSurveyInfo.class.indexmenusgul }} dropdown-menu" {{ aSurveyInfo.attr.indexmenusgul }}>
+        {% if aStatPanel.showAdmin %}
+            <li class=""  {{ aSurveyInfo.attr.indexmenusgli }}>
+                <a href="{{ createUrl('/admin/index') }}">
+                {{ gT('Administration') }}
+                </a>
+            </li>
+        {% endif %}
+        <li class=""  {{ aSurveyInfo.attr.indexmenusgli }}>
+            <a href="{{ createUrl('/admin/authentication',{'sa': 'logout'}) }}">
+            {{ gT('Logout') }}
+            </a>
+        </li>
+    </ul>
+</li>

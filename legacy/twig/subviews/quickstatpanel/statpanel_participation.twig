@@ -2,10 +2,10 @@
 
 <h1 class="text-primary quickstatpanel-title">{{ aStatPanel.titre }}</h1>
 <ul class="nav nav-tabs">
-  <li role="presentation" class="nav-item"><a class="nav-link active" href="#">{{ lang["Participation"] }}</a></li>
+  <li role="presentation" class="active"><a href="#">{{ lang["Participation"] }}</a></li>
   {% if aStatPanel.showSatisfaction %}
-    <li role="presentation" class="nav-item">
-        <a class="nav-link" href="{{ createUrl(
+    <li role="presentation">
+        <a href="{{ createUrl(
             "plugins/direct",
              ({
                 'plugin' : aStatPanel.className,
@@ -17,8 +17,8 @@
     </li>
   {% endif %}
   {% if aStatPanel.showAdminSurvey %}
-    <li role="presentation" class="nav-item">
-        <a class="nav-link" href="{{ createUrl(
+    <li role="presentation">
+        <a href="{{ createUrl(
             "surveyAdministration/view",
              ({
                 'plugin' : aStatPanel.className,
@@ -31,7 +31,7 @@
   {% endif %}
 </ul>
 {% if aStatPanel.htmlComment %}
-    <div class="card card-body bg-light clearfix">{{ aStatPanel.htmlComment }}</div>
+    <div class="well clearfix">{{ aStatPanel.htmlComment }}</div>
 {% endif %}
 
 {% if aStatPanel.aDailyResponses %}
@@ -75,13 +75,13 @@
     } %}
 {% endif %}
 
-<div class="card mt-1">
-  <div class="card-header text-white bg-primary quickstatpanel-title">
+<div class="panel panel-primary">
+  <div class="panel-heading quickstatpanel-title">
     <h2 class="quickstat-panel-title">{{ lang["Participation rate"] }}</h2>
   </div>
-  <div class="card-body">
+  <div class="panel-body">
     {% for key,aResponse in aStatPanel.aResponses %}
-       <table class="quickstat-table quickstat-table-participation quickstat-table-participation-{{ key }} table table-bordered table-striped table-hover {% if aResponse.max <= 0 %} quickstat-norate{% endif %}">
+       <table class="quickstat-table quickstat-table-participation quickstat-table-participation-{{ key }} table table-bordered table-striped {% if aResponse.max <= 0 %} quickstat-norate{% endif %}">
         <colgroup>
           <col class="quickstat-col-answer">
           {% if aResponse.max > 0 %}<col class="quickstat-col-nbsend">{% endif %}
@@ -89,7 +89,7 @@
           {% if aResponse.max > 0 %}<col class="quickstat-col-rate">{% endif %}
         </colgroup>
         <thead>
-            <tr class="quickstat-header table-info">
+            <tr class="quickstat-header info">
               <th class="answer-text">{{ aResponse.title }}</th>
               {% if aResponse.max > 0 %}<th class="quickstat-nbsend text-center">{% if aResponse.source == 'token' %}{{ lang["Invitation sent"] }} {% else %}{{ lang["Expected participants"] }}{% endif %}</th>{% endif %}
               <th class="quickstat-response text-center">{{ lang["Responses"] }}</th>

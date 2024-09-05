@@ -6,7 +6,7 @@ A plugin for limesurvey to show some quick statistics about participation and sa
 
 See [Install and activate a plugin for LimeSurvey](https://extensions.sondages.pro/install-and-activate-a-plugin-for-limesurvey) for details.
 
-This version is for LimeSurvey 4 and up and was tested on LimeSurvey 5 only.
+This version is for LimeSurvey 4 and up and was tested on LimeSurvey 5 and LimeSurvey 6. It can work on LimeSurvey 7, 8 and 9.
 
 ### Via GIT
 - Go to your LimeSurvey Directory
@@ -39,3 +39,4 @@ No support is done on issues, for professional support, please use our [contact 
 - Copyright © 2016-2023 Denis Chenu <http://sondages.pro>
 - Copyright © 2016-2023 Advantage <http://www.advantage.fr>
 - Licence : GNU Affero General Public License <https://www.gnu.org/licenses/agpl-3.0.html>
+- [Donate](https://support.sondages.pro/open.php?topicId=12), [Liberapay](https://liberapay.com/SondagesPro/), [OpenCollective](https://opencollective.com/sondagespro)

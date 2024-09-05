@@ -48,6 +48,11 @@ class quickStatAdminParticipationAndStat extends PluginBase
     ];
 
     /**
+     * @var integer : survey ID
+     */
+    private $iSurveyId;
+
+    /**
      * @var array : render Data
      */
     private $aRenderData = [];
@@ -56,6 +61,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
      * @var string : language for survey
      */
     private $surveyLanguage;
+
     protected $settings = [
         "docu" => ["type" => "info", "content" => ""],
         "redirectAfterLogin" => [
@@ -90,7 +96,6 @@ class quickStatAdminParticipationAndStat extends PluginBase
         $this->subscribe('afterSuccessfulLogin');
         /* Survey settings */
         $this->subscribe("beforeSurveySettings");
-        // $this->subscribe("newSurveySettings");
         /* Show page */
         $this->subscribe("newDirectRequest");
         /* Broken register
@@ -2024,6 +2029,9 @@ class quickStatAdminParticipationAndStat extends PluginBase
             throw new CHttpException(403);
         }
         $viewPath = dirname(__FILE__) . "/twig";
+        if (intval(App()->getConfig('versionnumber') < 6)) {
+            $viewPath = dirname(__FILE__) . "legacy/twig";
+        }
         $this->getEvent()->append("add", [$viewPath]);
     }
 
@@ -2034,6 +2042,9 @@ class quickStatAdminParticipationAndStat extends PluginBase
         }
         $this->getPluginTwigPath();
         $forcedPath = dirname(__FILE__) . "/twig_replace";
+        if (intval(App()->getConfig('versionnumber') < 6)) {
+            $forcedPath = dirname(__FILE__) . "legacy/twig";
+        }
         $this->getEvent()->append("replace", [$forcedPath]);
     }
 

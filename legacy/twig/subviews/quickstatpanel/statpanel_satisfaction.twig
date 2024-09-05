@@ -2,8 +2,8 @@
 
 <h1 class="text-primary quickstatpanel-title">{{ aStatPanel.titre }}</h1>
 <ul class="nav nav-tabs">
-    <li class="nav-item" role="presentation">
-        <a class="nav-link" href="{{ createUrl(
+    <li role="presentation">
+        <a href="{{ createUrl(
             "plugins/direct",
              ({
                 'plugin' : aStatPanel.className,
@@ -13,12 +13,12 @@
             ) }}"
         >{{ lang["Participation"] }} </a>
     </li>
-    <li class="nav-item"role="presentation">
-        <a class="nav-link active" href="#">{{ lang["Satisfaction"] }} </a>
+    <li role="presentation" class="active">
+        <a href="#">{{ lang["Satisfaction"] }} </a>
     </li>
   {% if aStatPanel.showAdminSurvey %}
-    <li class="nav-item" role="presentation">
-        <a class="nav-link" href="{{ createUrl(
+    <li role="presentation">
+        <a href="{{ createUrl(
             "surveyAdministration/view",
              ({
                 'plugin' : aStatPanel.className,
@@ -31,14 +31,14 @@
   {% endif %}
 </ul>
 {% if aStatPanel.htmlComment %}
-    <div class="card card-body bg-light  clearfix">{{ aStatPanel.htmlComment }}</div>
+    <div class="well clearfix">{{ aStatPanel.htmlComment }}</div>
 {% endif %}
 {% for iSatId, aSatisfaction in aStatPanel.aReorderSatisfactions %}
-<div class="card mt-1">
-  <div class="card-header text-white bg-primary quickstatpanel-title">
+<div class="panel panel-primary">
+  <div class="panel-heading quickstatpanel-title">
     <h2 class="quickstat-panel-title">{{ aSatisfaction.title }}</h2>
   </div>
-  <div class="card-body">
+  <div class="panel-body">
   {% for repKey, aResponse in aSatisfaction.aResponses %}
       {% if aResponse.type == 'table' %}
         {% include './subviews/quickstatpanel/statpanel_satisfaction_table.twig' with {
