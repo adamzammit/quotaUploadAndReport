@@ -1,4 +1,4 @@
-<h3 class="text-secondary quickstatpanel-title">{{ aResponse.title }}</h3>
+<h3 class="text-secondary quickstatpanel-title{% if(strpos("#" ~ aSurveyInfo.class.body, 'fruity_twentythree')) %} h5{% endif %}">{{ aResponse.title }}</h3>
 <table class="quickstat-table quickstat-table-satisfaction table table-bordered table-striped">
   <colgroup>
     <col class="quickstat-col-answer">

@@ -2030,7 +2030,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
         }
         $viewPath = dirname(__FILE__) . "/twig";
         if (intval(App()->getConfig('versionnumber') < 6)) {
-            $viewPath = dirname(__FILE__) . "legacy/twig";
+            $viewPath = dirname(__FILE__) . "/legacy/twig";
         }
         $this->getEvent()->append("add", [$viewPath]);
     }
@@ -2043,7 +2043,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
         $this->getPluginTwigPath();
         $forcedPath = dirname(__FILE__) . "/twig_replace";
         if (intval(App()->getConfig('versionnumber') < 6)) {
-            $forcedPath = dirname(__FILE__) . "legacy/twig";
+            $forcedPath = dirname(__FILE__) . "/legacy/twig";
         }
         $this->getEvent()->append("replace", [$forcedPath]);
     }

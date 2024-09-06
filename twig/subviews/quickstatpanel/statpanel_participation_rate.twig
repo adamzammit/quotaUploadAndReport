@@ -1,7 +1,7 @@
 {# @since 5.2.2 : fix processString #}
 <div class="card mt-1">
   <div class="card-header text-white bg-primary quickstatpanel-title">
-    <h2 class="quickstat-panel-title">{{ title }}</h2>
+    <h2 class="quickstat-panel-title{% if(strpos("#" ~ aSurveyInfo.class.body, 'fruity_twentythree')) %} h4{% endif %}">{{ title }}</h2>
   </div>
   <div class="card-body">
     <div id="chart-daily{{ type }}" class="chart-day graph jqplot-line"> </div>

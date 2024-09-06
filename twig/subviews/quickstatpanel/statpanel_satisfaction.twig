@@ -1,6 +1,6 @@
 {% set lang = aStatPanel.language %}
 
-<h1 class="text-primary quickstatpanel-title">{{ aStatPanel.titre }}</h1>
+<h1 class="text-primary quickstatpanel-title{% if(strpos("#" ~ aSurveyInfo.class.body, 'fruity_twentythree')) %} h4{% endif %}">{{ aStatPanel.titre }}</h1>
 <ul class="nav nav-tabs">
     <li class="nav-item" role="presentation">
         <a class="nav-link" href="{{ createUrl(
@@ -36,7 +36,7 @@
 {% for iSatId, aSatisfaction in aStatPanel.aReorderSatisfactions %}
 <div class="card mt-1">
   <div class="card-header text-white bg-primary quickstatpanel-title">
-    <h2 class="quickstat-panel-title">{{ aSatisfaction.title }}</h2>
+    <h2 class="quickstat-panel-title{% if(strpos("#" ~ aSurveyInfo.class.body, 'fruity_twentythree')) %} h4{% endif %}">{{ aSatisfaction.title }}</h2>
   </div>
   <div class="card-body">
   {% for repKey, aResponse in aSatisfaction.aResponses %}
