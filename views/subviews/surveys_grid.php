@@ -12,7 +12,11 @@
             'pageSize' => 20,
         ),
     ));
-    $this->widget('bootstrap.widgets.TbGridView', array(
+    $widget = 'application.extensions.admin.grid.CLSGridView';
+    if (intval(App()->getConfig('versionnumber')) < 6 ) {
+        $widget = 'bootstrap.widgets.TbGridView';
+    }
+    $this->widget($widget, array(
         'dataProvider' => $dataProvider,
         'htmlOptions' => ['class' => 'table-responsive grid-view-quickstats'],
         'ajaxUpdate' => true,
