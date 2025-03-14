@@ -4,10 +4,10 @@
  * Shown quick stat to allowed admin user
  *
  * @author Denis Chenu <denis@sondages.pro>
- * @copyright 2016-2023 Denis Chenu <https://www.sondages.pro>
+ * @copyright 2016-2025 Denis Chenu <https://www.sondages.pro>
  * @copyright 2016-2023 Advantage <http://www.advantage.fr>
  * @license AGPL v3
- * @version 5.3.1
+ * @version 5.3.5
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -1012,7 +1012,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
             throw new CHttpException(403);
         }
         Yii::import("application.helpers.viewHelper");
-        if ($this->event->get("target") != get_class()) {
+        if ($this->event->get("target") != __CLASS__) {
             return;
         }
         if (Yii::app()->user->getIsGuest()) {
