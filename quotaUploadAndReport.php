@@ -1,13 +1,14 @@
 <?php
 
 /**
- * Shown quick stat to allowed admin user
+ * Display a summary of the progress of the survey and allow for complex quota uploading and reporting
  *
- * @author Denis Chenu <denis@sondages.pro>
+ * @author Adam Zammit <adam.zammit@acspri.org.au>
+ * @copyright 2025 Adam Zammit <https://www.acspri.org.au/limesurvey>
  * @copyright 2016-2025 Denis Chenu <https://www.sondages.pro>
  * @copyright 2016-2023 Advantage <http://www.advantage.fr>
  * @license AGPL v3
- * @version 5.3.5
+ * @version 6.0.0
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -20,11 +21,11 @@
  * GNU Affero General Public License for more details.
  */
 
-class quickStatAdminParticipationAndStat extends PluginBase
+class quotaUploadAndReport extends PluginBase
 {
     protected $storage = "DbStorage";
-    protected static $description = "Show some specific statitics to your admin user.";
-    protected static $name = "quickStatAdminParticipationAndStat";
+    protected static $description = "Display a summary of the progress of the survey and allow for complex quota uploading and reporting";
+    protected static $name = "quotaUploadAndReport";
 
     /** @inheritdoc, this plugin allow this public method */
     public $allowedPublicMethods = array(
@@ -843,7 +844,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
         if (!Permission::model()->hasSurveyPermission($oSurvey->sid, 'surveysettings', 'update')) {
             throw new CHttpException(403);
         }
-        $aSettings = App()->getRequest()->getPost('quickStatAdminParticipationAndStat');
+        $aSettings = App()->getRequest()->getPost('quotaUploadAndReport');
         /* Fix not set dropdown */
         $aSettings["tokenAttributes"] = isset($aSettings["tokenAttributes"])
             ? $aSettings["tokenAttributes"]
@@ -1905,7 +1906,7 @@ class quickStatAdminParticipationAndStat extends PluginBase
     private function ownRender($type)
     {
         Yii::setPathOfAlias(
-            "quickStatAdminParticipationAndStat",
+            "quotaUploadAndReport",
             dirname(__FILE__)
         );
         $oEvent = $this->event;
@@ -2029,9 +2030,6 @@ class quickStatAdminParticipationAndStat extends PluginBase
             throw new CHttpException(403);
         }
         $viewPath = dirname(__FILE__) . "/twig";
-        if (intval(App()->getConfig('versionnumber') < 6)) {
-            $viewPath = dirname(__FILE__) . "/legacy/twig";
-        }
         $this->getEvent()->append("add", [$viewPath]);
     }
 
@@ -2042,9 +2040,6 @@ class quickStatAdminParticipationAndStat extends PluginBase
         }
         $this->getPluginTwigPath();
         $forcedPath = dirname(__FILE__) . "/twig_replace";
-        if (intval(App()->getConfig('versionnumber') < 6)) {
-            $forcedPath = dirname(__FILE__) . "/legacy/twig";
-        }
         $this->getEvent()->append("replace", [$forcedPath]);
     }
 
