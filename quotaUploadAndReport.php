@@ -27,14 +27,14 @@ class quotaUploadAndReport extends PluginBase
     protected static $description = "Display a summary of the progress of the survey and allow for complex quota uploading and reporting";
     protected static $name = "quotaUploadAndReport";
 
-    /** @inheritdoc, this plugin allow this public method */
+    /** @inheritdoc, Allow these public methods */
     public $allowedPublicMethods = array(
         'actionSettings',
         'actionSaveSettings',
     );
 
     /**
-     * @var string[] : this answer (label) must be moved at end
+     * @var string[] : this answer (label) must be moved to the end
      * @todo : move this to settings
      */
     private $aPushTokenValue = [
@@ -67,8 +67,8 @@ class quotaUploadAndReport extends PluginBase
         "docu" => ["type" => "info", "content" => ""],
         "redirectAfterLogin" => [
             "type" => "boolean",
-            "label" => "Check if user have only statistics permission after login and redirect to this plugin if yes.",
-            "help" => "Redirection happen if it's not already a plugin in current redirection.",
+            "label" => "If the user only has statistics permissions, automatically redirect to this plugin.",
+            "help" => "Will only redirect if a redirect is not already set in the URL.",
             "default" => 1,
         ],
         "dailyRateEnterAllow" => [
@@ -99,9 +99,6 @@ class quotaUploadAndReport extends PluginBase
         $this->subscribe("beforeSurveySettings");
         /* Show page */
         $this->subscribe("newDirectRequest");
-        /* Broken register
-        $this->subscribe("getValidScreenFiles");
-        */
     }
 
     /**
@@ -168,7 +165,7 @@ class quotaUploadAndReport extends PluginBase
             return;
         }
         $aMenuItem = array(
-            'label' => $this->translate('Quick statistics'),
+            'label' => $this->translate('Monitoring and Quota Report'),
             'iconClass' => 'fa fa-bar-chart',
             'href' => Yii::app()->createUrl(
                 'admin/pluginhelper',
@@ -182,7 +179,9 @@ class quotaUploadAndReport extends PluginBase
         );
         $menuItem = new \LimeSurvey\Menu\MenuItem($aMenuItem);
         $event->append('menuItems', array($menuItem));
+        $event->append('html',['<a href="test">test</a>']);
     }
+    
     /** The settings on own page */
     public function actionSettings($surveyId)
     {
@@ -234,7 +233,7 @@ class quotaUploadAndReport extends PluginBase
                 "type" => "info",
                 "content" =>
                     "<h5 class='alert alert-info'>" .
-                    $this->translate("Link to statitics :") .
+                    $this->translate("Link to monitoring and quota report :") .
                     "<a href='{$url}'>{$url}</a></h5>",
             ];
         } else {
@@ -262,7 +261,7 @@ class quotaUploadAndReport extends PluginBase
             "type" => "int",
             "label" => $this->translate("Expected participation"),
             "help" => $this->translate(
-                "Used for participation rate, replace token count value."
+                "Used for participation rate"
             ),
             "htmlOptions" => ["min" => 0],
             "current" => $this->get(
@@ -331,7 +330,7 @@ class quotaUploadAndReport extends PluginBase
                 $aSettings["dailyRateEnter"] = [
                     "type" => "select",
                     "label" => $this->translate(
-                        "Show the number of daily entries."
+                        "Show the number of daily survey opens."
                     ),
                     "options" => ["1" => gT("Yes"), "0" => gT("No")],
                     "current" => $this->get(
@@ -353,7 +352,7 @@ class quotaUploadAndReport extends PluginBase
                 $aSettings["dailyRateAction"] = [
                     "type" => "select",
                     "label" => $this->translate(
-                        "Show the number of daily activities."
+                        "Show the number of daily survey actions (clicked at least once)."
                     ),
                     "options" => ["1" => gT("Yes"), "0" => gT("No")],
                     "current" => $this->get(
@@ -368,7 +367,7 @@ class quotaUploadAndReport extends PluginBase
             $aSettings["dailyRate"] = [
                 "type" => "info",
                 "label" => $this->translate(
-                    "Survey are not date stamped: it's not possible to show daily rates."
+                    "This survey is not date stamped: it is not possible to show daily rates."
                 ),
             ];
         }
@@ -449,7 +448,7 @@ class quotaUploadAndReport extends PluginBase
             $aSettings["questionCross"] = [
                 "type" => "select",
                 "label" => $this->translate(
-                    "Question  for pivot (cross-sectional)"
+                    "Questions to show frequency tables in report"
                 ),
                 "options" => CHtml::listData(
                     $aoSingleQuestion,
@@ -472,345 +471,6 @@ class quotaUploadAndReport extends PluginBase
                     $surveyId
                 ),
             ];
-        }
-        /* numeric question */
-        $oCriteria = new CdbCriteria();
-        $oCriteria->condition =
-            "parent_qid=0 and t.sid=:sid and questionl10ns.language=:language";
-        $oCriteria->params[":sid"] = $oSurvey->sid;
-        $oCriteria->params[":language"] = $lang;
-        $oCriteria->addInCondition("type", [
-            "L",
-            "!",
-            "F",
-            "N",
-            "K",
-            "A",
-            "B",
-            ";",
-        ]); // see "*"
-        $oCriteria->order = "group_order ASC, question_order ASC";
-        $aoNumericPossibleQuestion = Question::model()
-            ->with("group")
-            ->with("questionl10ns")
-            ->findAll($oCriteria);
-        $aQuestionNumeric = [];
-        foreach ($aoNumericPossibleQuestion as $oQuestion) {
-            switch ($oQuestion->type) {
-                case "L":
-                case "!":
-                    // @todo : Test if have answer numeric
-                    $iNumAnswers = Answer::model()
-                        ->with("answerl10ns")
-                        ->count(
-                            "qid=:qid AND concat('',code * 1) = code AND language = :language",
-                            [":qid" => $oQuestion->qid, ":language" => $lang]
-                        );
-                    if ($iNumAnswers) {
-                        $aQuestionNumeric["{$oQuestion->qid}"] =
-                            "[{$oQuestion->title}] " .
-                            viewHelper::flatEllipsizeText(
-                                $oQuestion->questionl10ns[$lang]->question,
-                                1,
-                                80,
-                                "...",
-                                0.6
-                            );
-                    }
-                    break;
-                case "N":
-                    $aQuestionNumeric["{$oQuestion->qid}"] =
-                        "[{$oQuestion->title}] " .
-                        viewHelper::flatEllipsizeText(
-                            $oQuestion->questionl10ns[$lang]->question,
-                            1,
-                            80,
-                            "...",
-                            0.6
-                        );
-                    break;
-                case "K":
-                    $oSubQuestions = Question::model()
-                        ->with("questionl10ns")
-                        ->findAll([
-                            "condition" =>
-                                "parent_qid = :qid AND language = :language",
-                            "order" => "question_order",
-                            "params" => [
-                                ":qid" => $oQuestion->qid,
-                                ":language" => $lang,
-                            ],
-                        ]);
-                    foreach ($oSubQuestions as $oSubQuestion) {
-                        $aQuestionNumeric["{$oSubQuestion->qid}"] =
-                            "[{$oQuestion->title}_{$oSubQuestion->title}] " .
-                            viewHelper::flatEllipsizeText(
-                                $oQuestion->questionl10ns[$lang]->question,
-                                1,
-                                40,
-                                "...",
-                                0.6
-                            ) .
-                            " : " .
-                            viewHelper::flatEllipsizeText(
-                                $oSubQuestion->questionl10ns[$lang]->question,
-                                1,
-                                40,
-                                "...",
-                                0.6
-                            );
-                    }
-                    break;
-                case "A":
-                case "B":
-                    $oSubQuestions = Question::model()->with("questionl10ns")->findAll([
-                        "condition" => "parent_qid = :parent_qid AND language=:language",
-                        "order" => "question_order",
-                        "params" => [
-                            ":parent_qid" => $oQuestion->qid,
-                            ":language" => $lang,
-                        ],
-                    ]);
-                    foreach ($oSubQuestions as $oSubQuestion) {
-                        $aQuestionNumeric["{$oSubQuestion->qid}"] =
-                            "[{$oQuestion->title}_{$oSubQuestion->title}] " .
-                            viewHelper::flatEllipsizeText(
-                                $oQuestion->questionl10ns[$lang]->question,
-                                1,
-                                40,
-                                "...",
-                                0.6
-                            ) .
-                            " : " .
-                            viewHelper::flatEllipsizeText(
-                                $oSubQuestion->questionl10ns[$lang]->question,
-                                1,
-                                40,
-                                "...",
-                                0.6
-                            );
-                    }
-                    break;
-                case "F":
-                    $iNumAnswers = Answer::model()
-                        ->with("answerl10ns")
-                        ->count("qid=:qid AND concat('',code * 1) = code", [
-                            ":qid" => $oQuestion->qid,
-                        ]);
-                    if ($iNumAnswers) {
-                        $oSubQuestions = Question::model()->with("questionl10ns")->findAll([
-                            "condition" =>
-                                "parent_qid=:qid AND language=:language",
-                            "order" => "question_order",
-                            "params" => [
-                                ":qid" => $oQuestion->qid,
-                                ":language" => $oSurvey->language,
-                            ],
-                        ]);
-                        foreach ($oSubQuestions as $oSubQuestion) {
-                            $aQuestionNumeric["{$oSubQuestion->qid}"] =
-                                "[{$oQuestion->title}_{$oSubQuestion->title}] " .
-                                viewHelper::flatEllipsizeText(
-                                    $oQuestion->questionl10ns[$lang]->question,
-                                    1,
-                                    40,
-                                    "...",
-                                    0.6
-                                ) .
-                                " : " .
-                                viewHelper::flatEllipsizeText(
-                                    $oSubQuestion->questionl10ns[$lang]->question,
-                                    1,
-                                    40,
-                                    "...",
-                                    0.6
-                                );
-                        }
-                    }
-                    break;
-                case ";":
-                    //~ // Find if have starRating system
-                    $aoSubQuestionX = Question::model()->with("questionl10ns")->findAll([
-                        "condition" =>
-                            "parent_qid=:parent_qid and language=:language and scale_id=:scale_id",
-                        "params" => [
-                            ":parent_qid" => $oQuestion->qid,
-                            ":language" => $lang,
-                            ":scale_id" => 1,
-                        ],
-                        "index" => "qid",
-                    ]);
-                    $oCriteria = new CDbCriteria();
-                    $oCriteria->condition = "attribute='arrayTextAdaptation'";
-                    $oCriteria->addSearchCondition("value", "star%", false);
-                    $oCriteria->addInCondition(
-                        "qid",
-                        CHtml::listData($aoSubQuestionX, "qid", "qid")
-                    );
-                    $iExistingAttribute = QuestionAttribute::model()->count(
-                        $oCriteria
-                    );
-                    if ($iExistingAttribute) {
-                        $oSubQuestions = Question::model()->with("questionl10ns")->findAll(
-                            [
-                                "condition" =>
-                                    "parent_qid=:qid AND questionl10ns.language=:language AND scale_id=:scale_id",
-                                "order" => "question_order",
-                                "params" => [
-                                    ":qid" => $oQuestion->qid,
-                                    ":language" => $oSurvey->language,
-                                    ":scale_id" => 0,
-                                ],
-                            ]
-                        );
-                        foreach ($oSubQuestions as $oSubQuestion) {
-                            $aQuestionNumeric["{$oSubQuestion->qid}"] =
-                                "[{$oQuestion->title}_{$oSubQuestion->title}] " .
-                                viewHelper::flatEllipsizeText(
-                                    $oQuestion->questionl10ns[$lang]->question,
-                                    1,
-                                    40,
-                                    "...",
-                                    0.6
-                                ) .
-                                " : " .
-                                viewHelper::flatEllipsizeText(
-                                    $oSubQuestion->questionl10ns[$lang]->question,
-                                    1,
-                                    40,
-                                    "...",
-                                    0.6
-                                );
-                        }
-                    }
-                    break;
-                default:
-                    break;
-            }
-        }
-        if (!empty($aQuestionNumeric)) {
-            $aSettings["SatTitle"] = [
-                "type" => "info",
-                "content" =>
-                    "<h5 class='alert alert-info'>" .
-                    $this->translate("Satisfaction tab") .
-                    "</h5>",
-            ];
-            $aSettings["satisfactionComment"] = [
-                "type" => "html",
-                "label" => $this->translate("Description for satisfaction tab"),
-                "current" => $this->get(
-                    "satisfactionComment",
-                    "Survey",
-                    $surveyId,
-                    ""
-                ),
-                "height" => "8em",
-                "editorOptions" => ["link" => false, "image" => false],
-            ];
-            $aSettings["questionNumeric"] = [
-                "type" => "select",
-                "label" => $this->translate("Questions of satisfaction"),
-                "options" => $aQuestionNumeric,
-                "htmlOptions" => ["multiple" => "multiple"],
-                "current" => $this->get(
-                    "questionNumeric",
-                    "Survey",
-                    $surveyId
-                ),
-            ];
-            if (!empty($aTokenAttributes)) {
-                $aOptions = [];
-                foreach ($aTokenAttributes as $attribute => $description) {
-                    $aOptions[$attribute] = empty($description)
-                        ? $attribute
-                        : $description;
-                }
-                $aSettings["tokenAttributesSatisfaction"] = [
-                    "type" => "select",
-                    "label" => $this->translate(
-                        "Token attributes for pivot (graph)"
-                    ),
-                    "options" => $aOptions,
-                    "htmlOptions" => ["multiple" => "multiple"],
-                    "current" => $this->get(
-                        "tokenAttributesSatisfaction",
-                        "Survey",
-                        $surveyId
-                    ),
-                ];
-                $aSettings["tokenAttributesSatisfactionTable"] = [
-                    "type" => "select",
-                    "label" => $this->translate(
-                        "Token attributes for pivot (table)"
-                    ),
-                    "options" => $aOptions,
-                    "htmlOptions" => ["multiple" => "multiple"],
-                    "current" => $this->get(
-                        "tokenAttributesSatisfactionTable",
-                        "Survey",
-                        $surveyId
-                    ),
-                ];
-            }
-            if (!empty($aoSingleQuestion)) {
-                $aSettings["questionCrossSatisfaction"] = [
-                    "type" => "select",
-                    "label" => $this->translate(
-                        "Question for pivot (in graphic)"
-                    ),
-                    "options" => CHtml::listData(
-                        $aoSingleQuestion,
-                        "qid",
-                        function ($oSingleQuestion) use ($lang) {
-                            return "[" .
-                                $oSingleQuestion->title .
-                                "] " .
-                                viewHelper::flatEllipsizeText(
-                                    $oSingleQuestion->questionl10ns[$lang]->question,
-                                    1,
-                                    80,
-                                    "...",
-                                    0.6
-                                );
-                        }
-                    ),
-                    "htmlOptions" => ["multiple" => "multiple"],
-                    "current" => $this->get(
-                        "questionCrossSatisfaction",
-                        "Survey",
-                        $surveyId
-                    ),
-                ];
-                $aSettings["questionCrossSatisfactionTable"] = [
-                    "type" => "select",
-                    "label" => $this->translate(
-                        "Question for pivot (in array)"
-                    ),
-                    "options" => CHtml::listData(
-                        $aoSingleQuestion,
-                        "qid",
-                        function ($oSingleQuestion) use ($lang) {
-                            return "[" .
-                                $oSingleQuestion->title .
-                                "] " .
-                                viewHelper::flatEllipsizeText(
-                                    $oSingleQuestion->questionl10ns[$lang]->question,
-                                    1,
-                                    80,
-                                    "...",
-                                    0.6
-                                );
-                        }
-                    ),
-                    "htmlOptions" => ["multiple" => "multiple"],
-                    "current" => $this->get(
-                        "questionCrossSatisfactionTable",
-                        "Survey",
-                        $surveyId
-                    ),
-                ];
-            }
         }
         $aSettings["IndexTitle"] = [
             "type" => "info",
@@ -2064,7 +1724,7 @@ class quotaUploadAndReport extends PluginBase
     }
 
     /**
-     * Add needed functgion to twig
+     * Add needed function to twig
      */
     private function updateTwigConfiguration()
     {
@@ -2173,15 +1833,15 @@ class quotaUploadAndReport extends PluginBase
     private function getRenderLanguageStrings()
     {
         return array(
-            "Participation" => $this->translate("Participation"),
-            "Satisfaction" => $this->translate("Satisfaction"),
+            "Participation" => $this->translate("Participation rates"),
+            "Satisfaction" => $this->translate("Question monitoring"),
             "Administration" => $this->translate("Administration"),
             "Population" => $this->translate("Population"),
             "Export" => $this->translate("Export"),
             "Daily participation" => $this->translate("Daily participation"),
             "Daily participation (cumulative)" => $this->translate("Daily participation (cumulative)"),
-            "Number of connections" => $this->translate("Number of connections"),
-            "Daily participation rate" => $this->translate("Daily participation rate"),
+            "Number of connections" => $this->translate("Daily opens"),
+            "Daily participation rate" => $this->translate("Daily opens with at least one action"),
             "Expected participants" => $this->translate("Expected participants"),
             "Invitation sent" => $this->translate("Invitation sent"),
             "Responses" => $this->translate("Responses"),
