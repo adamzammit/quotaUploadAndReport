@@ -843,6 +843,7 @@ class quotaUploadAndReport extends PluginBase
             $max = Token::model($iSurveyId)->count(); // see with Token::model($iSurveyId)->empty()->count()
             $source = 'token';
         }
+        $ctimes = $this->getCompletionTimes($iSurveyId);
         $aResponses["total"] = [
             "title" => $this->translate("Globally"),
             "max" => $max,
@@ -854,6 +855,34 @@ class quotaUploadAndReport extends PluginBase
                         "submitdate IS NOT NULL"
                     ),
                 ],
+                [
+                    "title" => $this->translate("Total opened"),
+                    "max" => $max,
+                    "completed" => Response::model($iSurveyId)->count(
+                        "startdate IS NOT NULL"
+                    ),
+                ],
+                [
+                    "title" => $this->translate("Completion time (average)"),
+                    "max" => $max,
+                    "completed" => $ctimes['average']
+                ],
+                [
+                    "title" => $this->translate("Completion time (median)"),
+                    "max" => $max,
+                    "completed" => $ctimes['median']
+                ],
+                [
+                    "title" => $this->translate("Completion time (minimum)"),
+                    "max" => $max,
+                    "completed" => $ctimes['min']
+                ],
+                [
+                    "title" => $this->translate("Completion time (maximum)"),
+                    "max" => $max,
+                    "completed" => $ctimes['max']
+                ],
+
             ],
             'source' => $source
         ];
@@ -1408,6 +1437,48 @@ class quotaUploadAndReport extends PluginBase
         }
         die();
     }
+    
+    /**
+     * Get the completion times from the survey
+     * 
+     * @param int iSurveyId: the id of the survey
+     * @return array (completion time average and median)
+     */
+    private function getCompletionTimes($iSurveyId)
+    {
+		$aCompletionTimes = Yii::app()
+		    ->db->createCommand()
+		    ->select(
+		        "(submitdate - startdate) as t"
+		    )
+            ->from("{{survey_{$iSurveyId}}} s")
+            ->where("submitdate IS NOT NULL")
+            ->order("t")
+            ->queryAll();
+       
+        $aReturn = ["average" => "No completions yet", "median" => "No completions yet", "min" => "No completions yet", "max" => "No completions yet"]; 
+        $count = 0;
+        $total = 0;
+        foreach($aCompletionTimes as $aCompletionTime) {
+			$total += $aCompletionTime["t"];
+			$count++;
+		}
+		if ($count > 0) {
+			$aReturn["average"] = gmdate("H:i:s",intval($total/$count));
+			
+			if ($count % 2 == 0) {
+			    $medval = $aCompletionTimes[($count / 2)]["t"];
+			} else {
+			    $medval = ($aCompletionTimes[floor($count / 2)]["t"] +
+			               $aCompletionTimes[ceil($count / 2)]["t"]) / 2.0;
+            }
+			$aReturn["median"] = gmdate("H:i:s",intval($medval));
+			$aReturn["min"] = gmdate("H:i:s",intval($aCompletionTimes[0]["t"]));
+			$aReturn["max"] = gmdate("H:i:s",intval($aCompletionTimes[$count - 1]["t"]));
+		}
+		return $aReturn;
+	}
+    
     /**
      * Get the reponse by day
      * @param int iSurveyId : the id of the survey
