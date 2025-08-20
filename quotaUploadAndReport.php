@@ -900,6 +900,7 @@ class quotaUploadAndReport extends PluginBase
                     "participation",
                     "satisfaction",
                     "export",
+                    "quota",
                 ])
                     ? $sAction
                     : "participation";
@@ -913,6 +914,9 @@ class quotaUploadAndReport extends PluginBase
             case "participation":
                 $this->actionParticipation();
                 break;
+            case "quota":
+                $this->actionQuota();
+                break;
             case "satisfaction":
                 $this->actionSatisfaction();
                 break;
@@ -925,6 +929,74 @@ class quotaUploadAndReport extends PluginBase
                 break;
         }
     }
+
+    /**
+     * Get participation for this survey
+     * @return void (rendering)
+     */
+    public function actionQuota()
+    {
+        if (empty($this->aRenderData["oSurvey"])) {
+            throw new CHttpException(500);
+        }
+        $oSurvey = $this->aRenderData["oSurvey"];
+        if ($oSurvey->datestamp == "Y") {
+            if ($this->get("dailyRate", "Survey", $oSurvey->sid, 1)) {
+                $aDailyResponses = $this->aRenderData[
+                    "aDailyResponses"
+                ] = $this->getDailyResponsesRate($this->iSurveyId);
+            }
+            if ($this->get("dailyRateCumulative", "Survey", $oSurvey->sid, 1)) {
+                $aDailyResponses = isset($aDailyResponses)
+                    ? $aDailyResponses
+                    : $this->getDailyResponsesRate($this->iSurveyId);
+                if (!empty($aDailyResponses)) {
+                    $aDailyResponsesCumulative = [];
+                    $sum = 0;
+                    foreach ($aDailyResponses as $date => $nb) {
+                        $sum += $nb;
+                        $aDailyResponsesCumulative[$date] = $sum;
+                    }
+                    $this->aRenderData[
+                        "aDailyResponsesCumulative"
+                    ] = $aDailyResponsesCumulative;
+                }
+            }
+            if (
+                $this->get("dailyRateEnter", "Survey", $oSurvey->sid, 0) &&
+                $this->get(
+                    "dailyRateEnterAllow",
+                    null,
+                    null,
+                    $this->settings["dailyRateEnterAllow"]["default"]
+                )
+            ) {
+                $this->aRenderData[
+                    "aDailyEnter"
+                ] = $this->getDailyResponsesRate($this->iSurveyId, "startdate");
+            }
+            if (
+                $this->get("dailyRateAction", "Survey", $oSurvey->sid, 0) &&
+                $this->get(
+                    "dailyRateActionAllow",
+                    null,
+                    null,
+                    $this->settings["dailyRateActionAllow"]["default"]
+                )
+            ) {
+                $this->aRenderData[
+                    "aDailyAction"
+                ] = $this->getDailyResponsesRate($this->iSurveyId, "datestamp");
+            }
+        }
+        $this->aRenderData["aResponses"] = $this->getParticipationRate(
+            $this->iSurveyId
+        );
+        $this->aRenderData["htmlComment"] =  "QUOTA";
+        $this->ownRender("quota");
+    }
+
+    
     /**
      * Get participation for this survey
      * @return void (rendering)
@@ -2069,6 +2141,7 @@ class quotaUploadAndReport extends PluginBase
     {
         return array(
             "Participation" => $this->translate("Participation rates"),
+            "Quota report" => $this->translate("Quota report"),
             "Satisfaction" => $this->translate("Question monitoring"),
             "Administration" => $this->translate("Administration"),
             "Population" => $this->translate("Population"),

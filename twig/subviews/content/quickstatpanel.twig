@@ -5,6 +5,9 @@
 {% if aStatPanel.type == 'participation' %}
     {% include './subviews/quickstatpanel/statpanel_participation.twig' %}
 {% endif %}
+{% if aStatPanel.type == 'quota' %}
+    {% include './subviews/quickstatpanel/statpanel_quota.twig' %}
+{% endif %}
 {% if aStatPanel.type == 'satisfaction' %}
     {% include './subviews/quickstatpanel/statpanel_satisfaction.twig' %}
 {% endif %}
