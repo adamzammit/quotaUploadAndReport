@@ -489,11 +489,18 @@ class quotaUploadAndReport extends PluginBase
             "label" => $this->translate("Create index on response table"),
             "current" => 0,
         ];
+        $aSettings["QuotaTitle"] = [
+            "type" => "info",
+            "content" =>
+                "<h5 class='alert alert-info'>" .
+                $this->translate("Upload a new quota to the survey") .
+                "</h5>",
+        ];
         return [
             $this->translate('Settings') => $aSettings
         ];
     }
-
+    
     /** Save the settings **/
     public function actionSaveSettings($surveyId)
     {
@@ -540,6 +547,163 @@ class quotaUploadAndReport extends PluginBase
         $indexResponse = $aSettings['indexResponse'];
         unset($aSettings['indexToken']);
         unset($aSettings['indexResponse']);
+
+
+        if (isset($_FILES[get_class($this)]["tmp_name"]["fileUpload"]) &&
+            !empty($_FILES[get_class($this)]["tmp_name"]["fileUpload"])) {
+            //process uploaded quota file
+            $file = $_FILES[get_class($this)]["tmp_name"]["fileUpload"];
+            $name = $_FILES[get_class($this)]["name"]["fileUpload"];
+            
+            //1. check if quota name (Based on csv file name) already exists
+            $safename = trim(substr(preg_replace('/[^A-Za-z0-9 _-]/', '', substr($name,0,-4)),0,100)); //remove .csv and sanitise and max 100 chars
+ 
+            $quotas = Quota::model()->findAll("name LIKE :name AND sid = :sid", [':name' => $safename . "||%", ':sid' => $surveyId]); //gap chars are ||
+            
+            //2. If it does exist - fail with error
+            if (count($quotas) > 0) {
+				echo("This quota already exists, please try uploading a different file or changing the filename if you want to duplicate the quota");
+				die();
+			}
+            
+            //3. If it doesn't exist start validating upload
+            $handle = fopen($file,"r");
+            $rcount = 0;
+            $header = [];
+            $quotaquestions = [];
+            $reservednames = ["quota","message","url"];
+            $colcount = 0;
+            $quotalimit = [];
+            $message = [];
+            $url = [];
+            $quotavals = [];
+            while (($data = fgetcsv($handle)) !== FALSE) {
+                if ($rcount == 0) {
+					//validate the header
+					$dc = 0;
+					foreach($data as $h) {
+						$match = 0;
+						if (in_array($h,$reservednames)) {
+							$match = 1;
+						    $header[$dc] = $h;
+						} else {
+							$questions = Question::model()->findAll("title LIKE :title AND sid = :sid", [':title' => $h, ':sid' => $surveyId]);
+							if (count($questions) == 1) {
+								//matchy matchy
+								$match = 1;
+						        $header[$dc] = $questions[0];
+						        $quotaquestions[$colcount] = $questions[0];
+						        $colcount++;
+							}
+						}
+						if ($match == 0) {
+							echo("No matching question or reserved name for: $h");
+							die();
+						}
+						$dc++;
+					}
+					if ($colcount == 0) {
+						echo("No question supplied to set the quota from. Please ensure there is a column in the file matching a question");
+						die();
+					}
+				} else {
+				  //validate the data
+				  $dc = 0;
+				  foreach($data as $h) {
+					  if ($header[$dc] == "quota") {
+						  //check value matches quota
+						  if (!is_numeric($h)) {
+							  echo("Quota value: $h is not numeric");
+							  die();
+						  }
+						  $quotalimit[$rcount] = intval($h);
+					  }
+				      else if ($header[$dc] == "message") {
+						  //check value is a string
+						  $message[$rcount] = $h;
+					  }
+					  else if ($header[$dc] == "url") {
+						  //check value is a url
+						  $url[$rcount] = $h;
+					  } else {
+						  //check value is a valid label or code for this question
+						  $match = 0;
+						  foreach($header[$dc]->answers as $answer) {
+							  if ($answer->code == $h) {
+								  $match = 1;
+								  $quotavals[$rcount][$dc] = $answer;
+								  break;
+							  }
+							  else if ($answer->answerl10ns[$oSurvey->language]->answer == $h) {
+								  $match = 1;
+								  $quotavals[$rcount][$dc] = $answer;
+								  break;
+							  }
+						  }
+						  if ($match == 0) {
+							echo("No matching answer for: $h");
+							die();
+						  }
+					  }
+					  $dc++;
+				  }
+				}
+				$rcount++;
+            }
+           
+            //4. If upload is valid, create quota records in database.
+            
+            //start with the first column of quota questions and then loop over all possible column options 
+            foreach($quotavals as $rcount => $cols) {
+				//create a new quota with count($cols) dimensions
+			    $quota = new Quota();
+			    $subname = "";
+			    foreach($cols as $dc => $answer) {
+					$subname .= trim(substr($answer->answerl10ns[$oSurvey->language]->answer,0,48)) . "XX";
+				}
+			    $quota->name = $safename . "||" . substr($subname,0,-2);
+			    $quota->sid = $surveyId;
+			   
+			    if (isset($quotalimit[$rcount])) {
+					$quota->qlimit = $quotalimit[$rcount];
+					$quota->active = 1;
+					$quota->action = 3;
+				} else {
+					$quota->qlimit = 0;
+					$quota->active = 0;
+					$quota->action = 3;
+				}
+			    
+			    $quota->save();
+			    
+			    $quotals = new QuotaLanguageSetting();
+			    
+			    $quotals->quotals_quota_id = $quota->id;
+			    $quotals->quotals_language = $oSurvey->language;
+			    $quotals->quotals_name = $quota->name;
+			    
+			    if (isset($url[$rcount]) && !empty($url[$rcount])) {
+					$quota->autoload_url = 1;
+					$quotals->quotals_url = $url[$rcount];
+					$quota->save();
+				}
+			    
+				if (isset($message[$rcount]) && !empty($message[$rcount])) {
+					$quotals->quotals_message = $message[$rcount];
+				}
+				
+				$quotals->save();
+		    
+				foreach($cols as $dc => $answer) {
+					$quotamember = new QuotaMember();
+					$quotamember->sid = $surveyId;
+					$quotamember->qid = $header[$dc]->qid;
+					$quotamember->quota_id = $quota->id;
+					$quotamember->code = $answer->code;
+					$quotamember->save();
+				}
+			}
+	    }
 
         foreach ($aSettings as $name => $value) {
             /* In order use survey setting, if not set, use global, if not set use default */
