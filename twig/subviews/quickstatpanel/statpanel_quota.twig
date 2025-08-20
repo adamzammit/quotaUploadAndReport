@@ -41,79 +41,35 @@
         >{{ lang["Participation"] }} </a>
     </li>
 </ul>
-{% if aStatPanel.htmlComment %}
-    <div class="card card-body bg-light clearfix">{{ aStatPanel.htmlComment }}</div>
-{% endif %}
-
-{% if aStatPanel.aDailyResponses %}
-    {% include './subviews/quickstatpanel/statpanel_participation_rate.twig' with {
-        'title' : lang["Daily participation"],
-        'type' : '',
-        'aResponses' : aStatPanel.aDailyResponses,
-        'showExport' : aStatPanel.showExport,
-        'showSum' : 1,
-        'className' : aStatPanel.className
-    } %}
-{% endif %}
-{% if aStatPanel.aDailyResponsesCumulative %}
-    {% include './subviews/quickstatpanel/statpanel_participation_rate.twig' with {
-        'title' : lang["Daily participation (cumulative)"],
-        'type' : 'cumul',
-        'aResponses' : aStatPanel.aDailyResponsesCumulative,
-        'showExport' : aStatPanel.showExport,
-        'showSum' : 0,
-        'className' : aStatPanel.className
-    } %}
-{% endif %}
-{% if aStatPanel.aDailyEnter %}
-    {% include './subviews/quickstatpanel/statpanel_participation_rate.twig' with {
-        'title' : lang["Number of connections"],
-        'type' : 'enter',
-        'aResponses' : aStatPanel.aDailyEnter,
-        'showExport' : aStatPanel.showExport,
-        'showSum' : 0,
-        'className' : aStatPanel.className
-    } %}
-{% endif %}
-{% if aStatPanel.aDailyAction %}
-    {% include './subviews/quickstatpanel/statpanel_participation_rate.twig' with {
-        'title' : lang["Daily participation rate"],
-        'type' : 'action',
-        'aResponses' : aStatPanel.aDailyAction,
-        'showExport' : aStatPanel.showExport,
-        'showSum' : 0,
-        'className' : aStatPanel.className
-    } %}
-{% endif %}
 
 <div class="card mt-1">
   <div class="card-header text-white bg-primary quickstatpanel-title">
-    <h2 class="quickstat-panel-title{% if(strpos("#" ~ aSurveyInfo.class.body, 'fruity_twentythree')) %} h4{% endif %}">{{ lang["Participation rate"] }}</h2>
+    <h2 class="quickstat-panel-title{% if(strpos("#" ~ aSurveyInfo.class.body, 'fruity_twentythree')) %} h4{% endif %}">{{ lang["Quota report"] }}</h2>
   </div>
   <div class="card-body">
-    {% for key,aResponse in aStatPanel.aResponses %}
-       <table class="quickstat-table quickstat-table-participation quickstat-table-participation-{{ key }} table table-bordered table-striped table-hover {% if aResponse.max <= 0 %} quickstat-norate{% endif %}">
-        <colgroup>
-          <col class="quickstat-col-answer">
-          {% if aResponse.max > 0 %}<col class="quickstat-col-nbsend">{% endif %}
-          <col class="quickstat-col-response">
-          {% if aResponse.max > 0 %}<col class="quickstat-col-rate">{% endif %}
-        </colgroup>
-        <thead>
+    {% for key,aQuota in aStatPanel.aQuotas %}
+       <table class="quickstat-table quickstat-table-participation quickstat-table-quota-{{ key }} table table-bordered table-striped table-hover">
+          <colgroup class="quickstat-col-answer" span="{{ aQuota.colcount }}"></colgroup>
+          <col class="quickstat-col-completed">
+          <col class="quickstat-col-limit">
+          {% if aQuota.canedit > 0 %}<col class="quickstat-col-edit">{% endif %}
+          <thead>
             <tr class="quickstat-header table-info">
-              <th class="answer-text">{{ aResponse.title }}</th>
-              {% if aResponse.max > 0 %}<th class="quickstat-nbsend text-center">{% if aResponse.source == 'token' %}{{ lang["Invitation sent"] }} {% else %}{{ lang["Expected participants"] }}{% endif %}</th>{% endif %}
-              <th class="quickstat-response text-center">{{ lang["Responses"] }}</th>
-              {% if aResponse.max > 0 %}<th class="quickstat-rate text-center">{{ lang["Participation rate"] }}</th>{% endif %}
+              <th scope="colgroup" width="50%" class="quickstart-col-answer" colspan="{{ aQuota.colcount }}">{{ aQuota.name }}</th>
+              <th scope="col" class="quickstat-col-completed">Completed</th>
+              <th scope="col" class="quickstat-col-limit">Limit</th>
+              {% if aQuota.canedit > 0 %}<th scope="col" class="quickstat-col-edit">Actions</th>{% endif %}
             </tr>
         </thead>
         <tbody>
-          {% for aResponseData in aResponse.data %}
+          {% for aQuotaRow in aQuota.rows %}
           <tr>
-              <th class="answer-text control-label">{{ aResponseData.title }}</th>
-              {% if aResponse.max > 0 %}<td class="quickstat-nbsend text-center">{{ aResponseData.max }}</td>{% endif %}
-              <td class="quickstat-response text-center">{{ aResponseData.completed }}</td>
-              {% if aResponse.max > 0 %}<td class="quickstat-rate text-center">{% if aResponseData.max > 0 %}{{ processString("{round(100*" ~ aResponseData.completed ~ "/" ~ aResponseData.max ~ ")}") }}%{% endif %}</td>{% endif %}
+              {% for i in range(1,aQuota.colcount) %}
+                  <td class="answer-text control-label" {% if aQuotaRow.completed > aQuotaRow.limit %}style="background-color:pink"{% endif %} {% if aQuotaRow.active < 1 %}style="color:lightgray"{% endif %}>{{ aQuotaRow.cols[i - 1] }}</td>
+              {% endfor %}
+              <td class="quickstat-response text-center" {% if aQuotaRow.completed > aQuotaRow.limit %}style="background-color:pink"{% endif %} {% if aQuotaRow.active < 1 %}style="color:lightgray"{% endif %}>{{ aQuotaRow.completed }}</td>
+              <td class="quickstat-limit text-center" {% if aQuotaRow.completed > aQuotaRow.limit %}style="background-color:pink"{% endif %} {% if aQuotaRow.active < 1 %}style="color:lightgray"{% endif %}>{{ aQuotaRow.limit }}</td>
+              {% if aQuota.canedit > 0 %}<td class="quickstat-edit text-center" {% if aQuotaRow.completed > aQuotaRow.limit %}style="background-color:pink"{% endif %} {% if aQuotaRow.active < 1 %}style="color:lightgray"{% endif %}>Actions</td>{% endif %}
           </tr>
           {% endfor %}
         </tbody>

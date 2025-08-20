@@ -554,6 +554,11 @@ class quotaUploadAndReport extends PluginBase
             //process uploaded quota file
             $file = $_FILES[get_class($this)]["tmp_name"]["fileUpload"];
             $name = $_FILES[get_class($this)]["name"]["fileUpload"];
+           
+            //check permissions
+            if (!Permission::model()->hasSurveyPermission($iSurveyId, 'quotas', 'create')) {
+				die("You do not have permission to create quotas for this survey");
+			}
             
             //1. check if quota name (Based on csv file name) already exists
             $safename = trim(substr(preg_replace('/[^A-Za-z0-9 _-]/', '', substr($name,0,-4)),0,100)); //remove .csv and sanitise and max 100 chars
@@ -931,7 +936,7 @@ class quotaUploadAndReport extends PluginBase
     }
 
     /**
-     * Get participation for this survey
+     * Render quota report
      * @return void (rendering)
      */
     public function actionQuota()
@@ -940,59 +945,9 @@ class quotaUploadAndReport extends PluginBase
             throw new CHttpException(500);
         }
         $oSurvey = $this->aRenderData["oSurvey"];
-        if ($oSurvey->datestamp == "Y") {
-            if ($this->get("dailyRate", "Survey", $oSurvey->sid, 1)) {
-                $aDailyResponses = $this->aRenderData[
-                    "aDailyResponses"
-                ] = $this->getDailyResponsesRate($this->iSurveyId);
-            }
-            if ($this->get("dailyRateCumulative", "Survey", $oSurvey->sid, 1)) {
-                $aDailyResponses = isset($aDailyResponses)
-                    ? $aDailyResponses
-                    : $this->getDailyResponsesRate($this->iSurveyId);
-                if (!empty($aDailyResponses)) {
-                    $aDailyResponsesCumulative = [];
-                    $sum = 0;
-                    foreach ($aDailyResponses as $date => $nb) {
-                        $sum += $nb;
-                        $aDailyResponsesCumulative[$date] = $sum;
-                    }
-                    $this->aRenderData[
-                        "aDailyResponsesCumulative"
-                    ] = $aDailyResponsesCumulative;
-                }
-            }
-            if (
-                $this->get("dailyRateEnter", "Survey", $oSurvey->sid, 0) &&
-                $this->get(
-                    "dailyRateEnterAllow",
-                    null,
-                    null,
-                    $this->settings["dailyRateEnterAllow"]["default"]
-                )
-            ) {
-                $this->aRenderData[
-                    "aDailyEnter"
-                ] = $this->getDailyResponsesRate($this->iSurveyId, "startdate");
-            }
-            if (
-                $this->get("dailyRateAction", "Survey", $oSurvey->sid, 0) &&
-                $this->get(
-                    "dailyRateActionAllow",
-                    null,
-                    null,
-                    $this->settings["dailyRateActionAllow"]["default"]
-                )
-            ) {
-                $this->aRenderData[
-                    "aDailyAction"
-                ] = $this->getDailyResponsesRate($this->iSurveyId, "datestamp");
-            }
-        }
-        $this->aRenderData["aResponses"] = $this->getParticipationRate(
+        $this->aRenderData["aQuotas"] = $this->getQuotaData(
             $this->iSurveyId
         );
-        $this->aRenderData["htmlComment"] =  "QUOTA";
         $this->ownRender("quota");
     }
 
@@ -1067,6 +1022,61 @@ class quotaUploadAndReport extends PluginBase
         );
         $this->ownRender("participation");
     }
+    
+    
+    private function getQuotaData($iSurveyId)
+    {
+        $oSurvey = Survey::model()->findByPk($iSurveyId);
+        $aQuotas = [];
+        $canedit = 0;
+        if (Permission::model()->hasSurveyPermission($iSurveyId, 'quotas', 'update')) {
+			$canedit = 1;
+		}
+        
+        if (Permission::model()->hasSurveyPermission($iSurveyId, 'quotas', 'read')) {		
+			$quotas = Quota::model()->findAll("sid = :sid", [':sid' => $iSurveyId]);
+			
+			$qgroup = [];
+			
+			foreach($quotas as $q) {
+				$qc = stristr($q->name,'||',true);
+				if ($qc !== false) {
+					$qgroup[$qc][] = $q;
+				} else {
+					$qgroup[$q->name] = $q;
+				}
+			}
+			
+			//generate tables and actions based on permissions
+			foreach($qgroup as $name => $quotan) {
+				$n = [];
+				$n['name'] = $name;
+				$n['canedit'] = $canedit;
+				if (is_array($quotan)) {
+					foreach($quotan as $quota) {
+						$r['completed'] = $quota->completeCount;
+						$r['limit'] = $quota->qlimit;
+						$r['active'] = $quota->active;
+						$r['cols'] = explode("XX",substr(stristr($quota->name,"||"),2));
+					    $n['colcount'] = count($r['cols']);
+						$n['rows'][$quota->id] = $r;
+					}
+				} else {
+					$r['completed'] = $quotan->completeCount;
+					$r['limit'] = $quotan->qlimit;
+					$r['active'] = $quotan->active;
+					$r['cols'] = [$name];
+					$n['colcount'] = 1;
+					$n['rows'][$quotan->id] = $r;
+				}
+				
+				$aQuotas[] = $n;
+				
+			}
+		}
+		return $aQuotas;
+	}
+    
     protected function getParticipationRate($iSurveyId)
     {
         $oSurvey = Survey::model()->findByPk($iSurveyId);
