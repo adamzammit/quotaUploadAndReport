@@ -2166,13 +2166,13 @@ class quotaUploadAndReport extends PluginBase
             "Activate daily participation"
         );
         $this->settings["dailyRateEnterAllow"]["help"] = $this->translate(
-            "This allow to activate daily participation by survey"
+            "Allow surveys to enable the daily participation by survey report"
         );
         $this->settings["dailyRateActionAllow"]["label"] = $this->translate(
             "Activate daily action"
         );
         $this->settings["dailyRateActionAllow"]["help"] = $this->translate(
-            "This allow to activate daily action by survey"
+            "Allow surveys to enable the daily action by survey report"
         );
         return parent::getPluginSettings($getValues);
     }
