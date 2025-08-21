@@ -25,3 +25,11 @@
     color: inherit;
 }
 .quickstat-panel-title small{color: inherit;}
+
+.quickstat-col-completed {text-align: right;}
+.quickstat-col-limit {text-align: right;}
+.quickstat-col-edit {text-align: right;}
+
+.quickstat-completed {text-align: right;}
+.quickstat-limit {text-align: right;}
+.quickstat-edit {text-align: right;}

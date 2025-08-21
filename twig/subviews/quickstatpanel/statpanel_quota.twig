@@ -19,11 +19,12 @@
   {% if aStatPanel.showAdminSurvey %}
     <li role="presentation" class="nav-item">
         <a class="nav-link" href="{{ createUrl(
-            "surveyAdministration/view",
+            "admin/pluginhelper",
              ({
                 'plugin' : aStatPanel.className,
-                'function' : 'satisfaction',
-                'sid' : aSurveyInfo.sid
+                'method' : 'actionSettings',
+                'surveyId' : aSurveyInfo.sid,
+                'sa' : 'sidebody'
              })
             ) }}"
         >{{ lang["Administration"] }} </a>
@@ -55,21 +56,45 @@
           {% if aQuota.canedit > 0 %}<col class="quickstat-col-edit">{% endif %}
           <thead>
             <tr class="quickstat-header table-info">
-              <th scope="colgroup" width="50%" class="quickstart-col-answer" colspan="{{ aQuota.colcount }}">{{ aQuota.name }}</th>
-              <th scope="col" class="quickstat-col-completed">Completed</th>
-              <th scope="col" class="quickstat-col-limit">Limit</th>
-              {% if aQuota.canedit > 0 %}<th scope="col" class="quickstat-col-edit">Actions</th>{% endif %}
+              <th scope="colgroup" width="50%" class="quickstart-col-answer text-right" colspan="{{ aQuota.colcount }}">{{ aQuota.name }}</th>
+              <th scope="col" class="quickstat-col-completed text-right">Completed</th>
+              <th scope="col" class="quickstat-col-limit text-right">Limit</th>
+              {% if aQuota.canedit > 0 %}<th scope="col" class="quickstat-col-edit text-right">Actions</th>{% endif %}
             </tr>
         </thead>
         <tbody>
-          {% for aQuotaRow in aQuota.rows %}
+          {% for qkey,aQuotaRow in aQuota.rows %}
           <tr>
               {% for i in range(1,aQuota.colcount) %}
                   <td class="answer-text control-label" {% if aQuotaRow.completed > aQuotaRow.limit %}style="background-color:pink"{% endif %} {% if aQuotaRow.active < 1 %}style="color:lightgray"{% endif %}>{{ aQuotaRow.cols[i - 1] }}</td>
               {% endfor %}
-              <td class="quickstat-response text-center" {% if aQuotaRow.completed > aQuotaRow.limit %}style="background-color:pink"{% endif %} {% if aQuotaRow.active < 1 %}style="color:lightgray"{% endif %}>{{ aQuotaRow.completed }}</td>
-              <td class="quickstat-limit text-center" {% if aQuotaRow.completed > aQuotaRow.limit %}style="background-color:pink"{% endif %} {% if aQuotaRow.active < 1 %}style="color:lightgray"{% endif %}>{{ aQuotaRow.limit }}</td>
-              {% if aQuota.canedit > 0 %}<td class="quickstat-edit text-center" {% if aQuotaRow.completed > aQuotaRow.limit %}style="background-color:pink"{% endif %} {% if aQuotaRow.active < 1 %}style="color:lightgray"{% endif %}>Actions</td>{% endif %}
+              <td class="quickstat-completed text-right" {% if aQuotaRow.completed > aQuotaRow.limit %}style="background-color:pink"{% endif %} {% if aQuotaRow.active < 1 %}style="color:lightgray"{% endif %}>{{ aQuotaRow.completed }}</td>
+              <td class="quickstat-limit text-right" {% if aQuotaRow.completed > aQuotaRow.limit %}style="background-color:pink"{% endif %} {% if aQuotaRow.active < 1 %}style="color:lightgray"{% endif %}>{{ aQuotaRow.limit }}</td>
+              {% if aQuota.canedit > 0 %}<td class="quickstat-edit text-right" {% if aQuotaRow.completed > aQuotaRow.limit %}style="background-color:pink"{% endif %}>{% if aQuotaRow.active < 1 %}<a href="{{ createUrl(
+            "plugins/direct",
+             ({
+                'plugin' : aStatPanel.className,
+                'function' : 'activate',
+                'sid' : aSurveyInfo.sid,
+                'quota_id': qkey
+             })
+            ) }}"
+        ><i title="Click to activate this quota" class="ri-chat-4-line"></i></a>{% else %}<a href="{{ createUrl(
+            "plugins/direct",
+             ({
+                'plugin' : aStatPanel.className,
+                'function' : 'deactivate',
+                'sid' : aSurveyInfo.sid,
+                'quota_id': qkey
+             })
+            ) }}"
+        ><i title="Click to deactivate this quota" class="ri-chat-off-line"></i></a>{% endif %} <a href="{{ createUrl(
+            "quotas/editQuota",
+             {
+                'surveyid' : aSurveyInfo.sid,
+                'quota_id' : qkey
+             }
+            ) }}"><i title="Click to edit this quota"class="ri-edit-line"></i></a></td>{% endif %}
           </tr>
           {% endfor %}
         </tbody>

@@ -19,11 +19,12 @@
   {% if aStatPanel.showAdminSurvey %}
     <li role="presentation" class="nav-item">
         <a class="nav-link" href="{{ createUrl(
-            "surveyAdministration/view",
+            "admin/pluginhelper",
              ({
                 'plugin' : aStatPanel.className,
-                'function' : 'satisfaction',
-                'sid' : aSurveyInfo.sid
+                'method' : 'actionSettings',
+                'surveyId' : aSurveyInfo.sid,
+                'sa' : 'sidebody'
              })
             ) }}"
         >{{ lang["Administration"] }} </a>

@@ -906,6 +906,8 @@ class quotaUploadAndReport extends PluginBase
                     "satisfaction",
                     "export",
                     "quota",
+                    "activate",
+                    "deactivate"
                 ])
                     ? $sAction
                     : "participation";
@@ -919,6 +921,12 @@ class quotaUploadAndReport extends PluginBase
             case "participation":
                 $this->actionParticipation();
                 break;
+            case "activate":
+                $this->actionActivate($oSurvey->sid);
+                $this->actionQuota();
+                break;
+  			case "deactivate":
+			    $this->actionDeactivate($oSurvey->sid);
             case "quota":
                 $this->actionQuota();
                 break;
@@ -952,6 +960,32 @@ class quotaUploadAndReport extends PluginBase
     }
 
     
+    public function actionDeactivate($iSurveyId)
+    {
+		$quota_id = $this->api->getRequest()->getParam("quota_id");
+		if (is_numeric($quota_id)) {
+			$quota_id = intval($quota_id);
+            if (Permission::model()->hasSurveyPermission($iSurveyId, 'quotas', 'update')) {
+			    $quota = Quota::model()->find("id = :quota_id AND sid = :sid", [':sid' => $iSurveyId, ':quota_id' => $quota_id]);
+			    $quota->active = 0;
+			    $quota->save();
+			}
+		}
+	}
+    
+    public function actionActivate($iSurveyId)
+    {
+		$quota_id = $this->api->getRequest()->getParam("quota_id");
+		if (is_numeric($quota_id)) {
+			$quota_id = intval($quota_id);
+            if (Permission::model()->hasSurveyPermission($iSurveyId, 'quotas', 'update')) {
+			    $quota = Quota::model()->find("id = :quota_id AND sid = :sid", [':sid' => $iSurveyId, ':quota_id' => $quota_id]);
+			    $quota->active = 1;
+			    $quota->save();
+			}
+		}
+	}
+   
     /**
      * Get participation for this survey
      * @return void (rendering)
