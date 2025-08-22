@@ -556,7 +556,7 @@ class quotaUploadAndReport extends PluginBase
             $name = $_FILES[get_class($this)]["name"]["fileUpload"];
            
             //check permissions
-            if (!Permission::model()->hasSurveyPermission($iSurveyId, 'quotas', 'create')) {
+            if (!Permission::model()->hasSurveyPermission($surveyId, 'quotas', 'create')) {
 				die("You do not have permission to create quotas for this survey");
 			}
             
