@@ -692,11 +692,13 @@ class quotaUploadAndReport extends PluginBase
 					$quotals->quotals_url = $url[$rcount];
 					$quota->save();
 				}
-			    
+ 
+			    $qmessage = "Sorry your responses have exceeded a quota on this survey.";
 				if (isset($message[$rcount]) && !empty($message[$rcount])) {
-					$quotals->quotals_message = $message[$rcount];
+					$qmessage = $message[$rcount];
 				}
 				
+				$quotals->quotals_message = $qmessage;
 				$quotals->save();
 		    
 				foreach($cols as $dc => $answer) {
