@@ -1901,11 +1901,12 @@ class quotaUploadAndReport extends PluginBase
             [":uid" => Yii::app()->session["loginID"], ":permission" => "auth%"]
         );
         $countSurveyPermission = Permission::model()->count(
-            "uid=:uid AND (permission NOT LIKE :permission1 AND permission NOT LIKE :permission2) AND entity='Survey' AND (create_p > 0 or read_p > 0 or update_p > 0 or delete_p > 0 or import_p > 0 or import_p > 0)",
+            "uid=:uid AND (permission NOT LIKE :permission1 AND permission NOT LIKE :permission2 AND permission NOT LIKE :permission3) AND entity='Survey' AND (create_p > 0 or read_p > 0 or update_p > 0 or delete_p > 0 or import_p > 0 or import_p > 0)",
             [
                 ":uid" => Yii::app()->session["loginID"],
                 ":permission1" => "statistics",
                 ":permission2" => "survey",
+                ":permission3" => "quotas",
             ]
         );
 
